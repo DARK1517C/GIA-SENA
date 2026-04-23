@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Usuarios | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Seguridad y acceso</p>
+        <h1>Gestión de Usuarios</h1>
+        <p>Administra usuarios, roles y permisos dentro de la plataforma.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel__header"><h2>Nuevo usuario</h2></div>
+    <form method="post" class="filters-grid filters-grid--five">
+        <input type="text" name="full_name" placeholder="Nombre completo" required>
+        <input type="text" name="username" placeholder="Usuario" required>
+        <input type="email" name="email" placeholder="Correo">
+        <select name="role" required>
+            <option value="docente">Docente</option>
+            <option value="visualizador">Visualizador</option>
+            <option value="super_admin">Super Admin</option>
+        </select>
+        <input type="text" name="password" placeholder="Contraseña inicial" required>
+        <button type="submit" class="primary-btn">Crear usuario</button>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Nombre completo</th>
+                    <th>Rol</th>
+                    <th>Correo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}<br><small>ID: {{ user.id }}</small></td>
+                    <td>{{ user.full_name }}</td>
+                    <td><span class="badge badge--violet">{{ role_labels[user.role] }}</span></td>
+                    <td>{{ user.email or 'Sin correo' }}</td>
+                    <td class="actions-cell">
+                        {% if user.id != current_user.id %}
+                        <form method="post" action="{{ url_for('user_delete', user_id=user.id) }}" onsubmit="return confirm('¿Eliminar este usuario?');">
+                            <button type="submit" class="danger-btn">Eliminar</button>
+                        </form>
+                        {% else %}
+                        <span class="badge">Sesión actual</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="empty-state">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
