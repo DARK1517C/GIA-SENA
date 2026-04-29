@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Vista detallada</p>
+        <h1>{{ page_title }}</h1>
+        <p>Información organizada y estructurada para consulta rápida.</p>
+    </div>
+    <div class="toolbar__actions">
+        {% if edit_url %}
+        <a class="primary-btn" href="{{ edit_url }}">Editar</a>
+        {% endif %}
+        <a class="ghost-btn" href="{{ back_url }}">Volver</a>
+    </div>
+</section>
+
+<section class="panel detail-grid">
+    {% for key, label in fields %}
+    <article class="detail-item">
+        <span>{{ label }}</span>
+        <strong>{{ record|attr(key) or 'Sin dato' }}</strong>
+    </article>
+    {% endfor %}
+</section>
+{% endblock %}

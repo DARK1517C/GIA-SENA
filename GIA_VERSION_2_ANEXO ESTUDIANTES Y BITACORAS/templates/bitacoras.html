@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Bitácoras | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <p class="eyebrow">Seguimiento documental</p>
+        <h1>Bitácoras</h1>
+        <p>Carga, consulta y administra bitácoras por aprendiz.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel__header"><h2>Subir bitácora</h2></div>
+    <form method="post" enctype="multipart/form-data" class="filters-grid filters-grid--four">
+        {% if current_user.role == 'aprendiz' and apprentices|length == 1 %}
+        <input type="hidden" name="apprentice_id" value="{{ apprentices[0].id }}">
+        <input type="text" value="{{ apprentices[0].full_name }} - {{ apprentices[0].group_number }}" disabled>
+        {% else %}
+        <select name="apprentice_id" required>
+            <option value="">Selecciona un aprendiz</option>
+            {% for apprentice in apprentices %}
+            <option value="{{ apprentice.id }}" {% if selected_apprentice and selected_apprentice.id == apprentice.id %}selected{% endif %}>
+                {{ apprentice.full_name }} - {{ apprentice.document_number }} - Ficha {{ apprentice.group_number }}
+            </option>
+            {% endfor %}
+        </select>
+        {% endif %}
+        <input type="text" name="title" placeholder="Bitácora 1, Bitácora 2, Bitácora 3...">
+        <input type="text" name="notes" placeholder="Observaciones o información adicional">
+        <input type="file" name="file">
+        <button type="submit" class="primary-btn">Registrar bitácora</button>
+    </form>
+</section>
+
+{% if current_user.role != 'aprendiz' %}
+<section class="panel">
+    <div class="panel__header"><h2>Filtrar historial</h2></div>
+    <form class="filters-grid filters-grid--four" method="get">
+        <input type="text" name="apprentice_search" placeholder="Digita nombre o documento del aprendiz" value="{{ request.args.get('apprentice_search', '') }}">
+        <input type="text" name="group_search" placeholder="Digita la ficha" value="{{ request.args.get('group_search', '') }}">
+        <input type="text" name="instructor_search" placeholder="Buscar por instructor" value="{{ request.args.get('instructor_search', '') }}">
+        <select name="apprentice_id">
+            <option value="">Todos los aprendices</option>
+            {% for apprentice in apprentices %}
+            <option value="{{ apprentice.id }}" {% if request.args.get('apprentice_id') == apprentice.id|string %}selected{% endif %}>
+                {{ apprentice.full_name }} - {{ apprentice.group_number }}
+            </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="ghost-btn">Filtrar</button>
+    </form>
+</section>
+{% endif %}
+
+<section class="panel">
+    <div class="panel__header"><h2>Histórico de bitácoras</h2></div>
+    <div class="list-stack">
+        {% for item in bitacoras %}
+        <article class="stack-item stack-item--wide">
+            <div>
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.apprentice.full_name }} · Ficha {{ item.apprentice.group_number }}</p>
+                <small>
+                    Instructor: {{ item.apprentice.followup_instructor or item.apprentice.lead_instructor or 'Sin instructor' }}
+                    · Registrada por {{ item.uploaded_by.full_name }} el {{ item.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </small>
+                <p>{{ item.notes or 'Sin observaciones' }}</p>
+            </div>
+            <div class="toolbar__actions">
+                {% if item.file_path %}
+                <span class="badge badge--blue">{{ item.file_name }}</span>
+                {% endif %}
+                <form method="post" action="{{ url_for('bitacora_delete', bitacora_id=item.id) }}" onsubmit="return confirm('¿Eliminar esta bitácora?');">
+                    <button type="submit" class="danger-btn">Eliminar</button>
+                </form>
+            </div>
+        </article>
+        {% else %}
+        <p class="empty-state">No hay bitácoras registradas todavía.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

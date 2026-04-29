@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Aprendices | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Módulo principal</p>
+        <h1>Gestión de Aprendices</h1>
+        <p>Administra y consulta la información de los aprendices.</p>
+    </div>
+    {% if current_user.role in ['docente', 'super_admin'] %}
+    <a class="primary-btn" href="{{ url_for('apprentice_create') }}">+ Nuevo aprendiz</a>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <div class="panel__header">
+        <h2>Filtros y búsqueda</h2>
+        {% if current_user.role in ['docente', 'super_admin'] %}
+        <details class="menu-dots">
+            <summary class="ghost-btn ghost-btn--icon">...</summary>
+            <button type="submit" class="danger-btn" form="bulk-apprentices-form" onclick="return confirm('¿Eliminar los aprendices seleccionados?');">Eliminar seleccionados</button>
+        </details>
+        {% endif %}
+    </div>
+    <form class="filters-grid" method="get">
+        <input type="text" name="search" placeholder="Buscar por nombre, documento o ficha" value="{{ request.args.get('search', '') }}">
+        <input type="text" name="group_number" list="group-number-list" placeholder="Digita o selecciona una ficha" value="{{ request.args.get('group_number', '') }}">
+        <datalist id="group-number-list">
+            {% for group in groups %}
+            <option value="{{ group.group_number }}">
+            {% endfor %}
+        </datalist>
+        <input type="text" name="ep_modality" placeholder="Filtrar por modalidad" value="{{ request.args.get('ep_modality', '') }}">
+        <input type="text" name="status" placeholder="Filtrar por estado" value="{{ request.args.get('status', '') }}">
+        <button type="submit" class="ghost-btn">Filtrar</button>
+    </form>
+    <div class="toolbar">
+        <span>Mostrando {{ apprentices|length }} aprendices</span>
+        <div class="toolbar__actions">
+            <a class="ghost-btn" href="{{ url_for('export_apprentices') }}">Exportar XLSX</a>
+            {% if current_user.role in ['docente', 'super_admin'] %}
+            <form method="post" action="{{ url_for('import_apprentices') }}" enctype="multipart/form-data" class="inline-upload">
+                <input type="file" name="file" accept=".xlsx" required>
+                <button type="submit" class="ghost-btn">Importar XLSX</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    {% if current_user.role in ['docente', 'super_admin'] %}
+                    <th>
+                        <label class="select-all-chip">
+                            <input type="checkbox" data-select-all>
+                            <span class="select-all-chip__marker"></span>
+                        </label>
+                    </th>
+                    {% endif %}
+                    <th>Documento</th>
+                    <th>Nombre completo</th>
+                    <th>Ficha</th>
+                    <th>Programa</th>
+                    <th>Modalidad EP</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apprentice in apprentices %}
+                <tr>
+                    {% if current_user.role in ['docente', 'super_admin'] %}
+                    <td><input type="checkbox" name="selected_ids" value="{{ apprentice.id }}" data-select-item form="bulk-apprentices-form"></td>
+                    {% endif %}
+                    <td>{{ apprentice.document_number }}<br><small>{{ apprentice.document_type }}</small></td>
+                    <td>{{ apprentice.full_name }}<br><small>{{ apprentice.email }}</small></td>
+                    <td>{{ apprentice.group_number }}</td>
+                    <td>{{ apprentice.program_name }}</td>
+                    <td><span class="badge badge--blue">{{ apprentice.ep_modality or 'Sin definir' }}</span></td>
+                    <td><span class="badge badge--green">{{ apprentice.sofia_status or 'Sin estado' }}</span></td>
+                    <td class="actions-cell">
+                        <a class="ghost-btn" href="{{ url_for('apprentice_detail', apprentice_id=apprentice.id) }}">Ver</a>
+                        {% if current_user.role in ['docente', 'super_admin'] or (current_user.role == 'aprendiz' and apprentice.student_user_id == current_user.id) %}
+                        <a class="ghost-btn" href="{{ url_for('apprentice_edit', apprentice_id=apprentice.id) }}">Editar</a>
+                        {% endif %}
+                        {% if current_user.role in ['docente', 'super_admin'] %}
+                        <form method="post" action="{{ url_for('apprentice_delete', apprentice_id=apprentice.id) }}" onsubmit="return confirm('¿Eliminar este aprendiz?');">
+                            <button type="submit" class="danger-btn">Eliminar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="{% if current_user.role in ['docente', 'super_admin'] %}8{% else %}7{% endif %}" class="empty-state">No hay aprendices registrados para mostrar.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if current_user.role in ['docente', 'super_admin'] %}
+    <form id="bulk-apprentices-form" method="post" action="{{ url_for('apprentice_bulk_delete') }}" data-bulk-form>
+        <div class="bulk-bar">
+            <label class="select-all-pill">
+                <input type="checkbox" data-select-all>
+                <span class="select-all-pill__box"></span>
+                <span data-select-count>Seleccionar todo</span>
+            </label>
+            <button type="submit" class="danger-btn" onclick="return confirm('¿Eliminar los aprendices seleccionados?');">Eliminar seleccionados</button>
+        </div>
+    </form>
+    {% endif %}
+</section>
+{% endblock %}
