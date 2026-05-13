@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Usuarios | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Seguridad y acceso</p>
+        <h1>Gestión de Usuarios</h1>
+        <p>Administra usuarios, roles y permisos dentro de la plataforma.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel__header"><h2>Nuevo usuario</h2></div>
+    <form method="post" class="filters-grid filters-grid--five">
+        <input type="text" name="full_name" placeholder="Nombre completo" required>
+        <input type="text" name="username" placeholder="Usuario" required>
+        <input type="email" name="email" placeholder="Correo">
+        <select name="role" required>
+            <option value="docente">Docente</option>
+            <option value="visualizador">Visualizador</option>
+            <option value="super_admin">Super Admin</option>
+        </select>
+        <input type="text" name="password" placeholder="Contraseña inicial" required>
+        <button type="submit" class="primary-btn">Crear usuario</button>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel__header">
+        <h2>Listado de usuarios</h2>
+        <details class="menu-dots">
+            <summary class="ghost-btn ghost-btn--icon">...</summary>
+            <button type="submit" class="danger-btn" form="bulk-users-form" onclick="return confirm('¿Eliminar los usuarios seleccionados?');">Eliminar seleccionados</button>
+        </details>
+    </div>
+    <form class="filters-grid filters-grid--four" method="get">
+        <input type="text" name="search" placeholder="Buscar por usuario o nombre" value="{{ request.args.get('search', '') }}">
+        <select name="role">
+            <option value="">Todos los roles</option>
+            {% for value, label in role_labels.items() %}
+            <option value="{{ value }}" {% if request.args.get('role') == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="ghost-btn">Filtrar</button>
+    </form>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <label class="select-all-chip">
+                            <input type="checkbox" data-select-all>
+                            <span class="select-all-chip__marker"></span>
+                        </label>
+                    </th>
+                    <th>Usuario</th>
+                    <th>Nombre completo</th>
+                    <th>Rol</th>
+                    <th>Correo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        {% if user.id != current_user.id %}
+                        <input type="checkbox" name="selected_ids" value="{{ user.id }}" data-select-item form="bulk-users-form">
+                        {% endif %}
+                    </td>
+                    <td>{{ user.username }}<br><small>ID: {{ user.id }}</small></td>
+                    <td>{{ user.full_name }}</td>
+                    <td><span class="badge badge--violet">{{ role_labels[user.role] }}</span></td>
+                    <td>{{ user.email or 'Sin correo' }}</td>
+                    <td class="actions-cell">
+                        {% if user.id != current_user.id %}
+                        <form method="post" action="{{ url_for('user_delete', user_id=user.id) }}" onsubmit="return confirm('¿Eliminar este usuario?');">
+                            <button type="submit" class="danger-btn">Eliminar</button>
+                        </form>
+                        {% else %}
+                        <span class="badge">Sesión actual</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty-state">No hay usuarios registrados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <form id="bulk-users-form" method="post" action="{{ url_for('user_bulk_delete') }}" data-bulk-form>
+        <div class="bulk-bar">
+            <label class="select-all-pill">
+                <input type="checkbox" data-select-all>
+                <span class="select-all-pill__box"></span>
+                <span data-select-count>Seleccionar todo</span>
+            </label>
+            <button type="submit" class="danger-btn" onclick="return confirm('¿Eliminar los usuarios seleccionados?');">Eliminar seleccionados</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
