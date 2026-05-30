@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Ingreso | GIA{% endblock %}
+{% block body_class %}login-body{% endblock %}
+{% block content %}
+<section class="login-layout">
+    <div class="login-card">
+        <div class="login-brand">
+            <div class="brand-mark large">SENA</div>
+            <div>
+                <strong>GIA</strong>
+                <span>Gestión Integral de Aprendices</span>
+            </div>
+        </div>
+        <h1>Inicia sesión</h1>
+        <p>Accede con tu usuario o documento para gestionar aprendices, fichas y bitácoras.</p>
+        <form method="post" class="login-form">
+            <label>
+                <span>Usuario o documento</span>
+                <input type="text" name="username" placeholder="Usuario" required>
+            </label>
+            <label>
+                <span>Contraseña</span>
+                <input type="password" name="password" placeholder="Contraseña" required>
+            </label>
+            <div class="login-actions">
+                <button type="submit" class="primary-btn">Ingresar</button>
+                <small>Complejo Tecnológico Minero Agroempresarial</small>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

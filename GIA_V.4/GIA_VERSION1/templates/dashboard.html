@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Panel de control | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <p class="eyebrow">Sistema GIA</p>
+        <h1>Panel de control</h1>
+        <p>Resumen operativo de la gestión integral de aprendices del SENA.</p>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <span>Aprendices totales</span>
+        <strong>{{ stats.total_apprentices }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Fichas totales</span>
+        <strong>{{ stats.total_groups }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>En práctica</span>
+        <strong>{{ stats.in_practice }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Sin alternativa</span>
+        <strong>{{ stats.without_alternative }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Certificados</span>
+        <strong>{{ stats.certified }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Contrato aprendizaje</span>
+        <strong>{{ stats.contracts }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Pasantías</span>
+        <strong>{{ stats.internships }}</strong>
+    </article>
+    <article class="stat-card">
+        <span>Vinculación laboral</span>
+        <strong>{{ stats.employment }}</strong>
+    </article>
+</section>
+
+{% if current_user.role == 'docente' %}
+<section class="panel-grid">
+    <div class="panel">
+        <div class="panel__header">
+            <h2>Seguimiento de etapa productiva</h2>
+            <span class="tag">Docente</span>
+        </div>
+        <div class="tracking-grid">
+            {% for item in tracking_cards %}
+            <article class="tracking-card">
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.date }}</p>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="panel">
+        <div class="panel__header">
+            <h2>Modalidades destacadas</h2>
+        </div>
+        <div class="progress-list">
+            <div><span>Contrato de aprendizaje</span><strong>{{ stats.contracts }}</strong></div>
+            <div><span>Pasantía</span><strong>{{ stats.internships }}</strong></div>
+            <div><span>Proyecto productivo</span><strong>{{ stats.projects }}</strong></div>
+            <div><span>Vinculación laboral</span><strong>{{ stats.employment }}</strong></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="panel">
+    <div class="panel__header">
+        <h2>Bitácoras recientes</h2>
+    </div>
+    {% if recent_bitacoras %}
+    <div class="list-stack">
+        {% for item in recent_bitacoras %}
+        <article class="stack-item">
+            <div>
+                <strong>{{ item.title }}</strong>
+                <p>{{ item.apprentice.full_name }} · {{ item.uploaded_by.full_name }}</p>
+            </div>
+            <span>{{ item.created_at.strftime('%Y-%m-%d') }}</span>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">Aún no hay bitácoras registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

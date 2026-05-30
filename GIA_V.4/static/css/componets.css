@@ -1,0 +1,477 @@
+/* =========================================================
+   components.css
+   Reorganized, grouped and cleaned
+   ========================================================= */
+
+/* -------------------------
+   Buttons
+   ------------------------- */
+
+.primary-btn {
+  display: inline-flex;
+  min-height: 40px;
+  background: var(--green);
+  padding: 0 12px;
+  color: #fff;
+  border: 0;
+  border-radius: var(--space-xs);
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.primary-btn:hover {
+  background: var(--darkgreen);
+}
+
+/* contenedor sin fondo; el icono es el que cambia de color */
+.icon-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:4px;
+  width:40px;
+  height:40px;
+  border-radius:var(--space-xs);
+  background: transparent;   /* sin cuadro coloreado */
+  border: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+/* SVG hereda color; definimos color por clase */
+.icon-btn svg {
+  width:28px;
+  height:28px;
+  display:block;
+  fill: currentColor;
+  transition: color 180ms ease, transform 120ms ease;
+}
+
+/* EDIT (verde) */
+.icon-btn--edit svg {
+  color: var(--green);
+}
+.icon-btn--edit:hover svg,
+.icon-btn--edit:focus svg {
+  color: var(--darkgreen);
+}
+
+/* DELETE (rojo) */
+.icon-btn--danger svg {
+  color: var(--danger);
+}
+.icon-btn--danger:hover svg,
+.icon-btn--danger:focus svg {
+  color: var(--darkdanger);
+}
+
+/* focus-visible accesible */
+.icon-btn:focus-visible {
+  outline: none;
+}
+.icon-btn:focus-visible svg {
+  box-shadow: var(--shadow); /* para edit; si quieres distinto para delete, añade reglas específicas */
+}
+
+.ghost-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--space-xs);
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+}
+.ghost-btn:hover { background: #f0f0f0; }
+.ghost-btn:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+
+/* -------------------------
+   Panels and layout blocks
+   ------------------------- */
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+/* Toolbar */
+.toolbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+}
+.toolbar__actions { display:flex; gap:.5rem; align-items:center; }
+
+/* Bulk bar (used under tables/lists) */
+.bulk-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: #f9f9f9;
+  border-top: 1px solid #d9d9d9;
+  margin-top: var(--space-md);
+}
+
+/* -------------------------
+   Stat cards / Dashboard
+   ------------------------- */
+.stat-card {
+  min-height: 180px;
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+.stat-card:focus-within,
+.stat-card:focus {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+/* Grid for stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+/* Icon circle inside stat card */
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--navy);
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--space-sm);
+}
+.stat-icon .icon {
+  width: 28px;
+  height: 28px;
+  color: #fff;
+  display:block;
+  fill: currentColor;
+}
+
+/* Stat text */
+.stat-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+.stat-card strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--green);
+}
+
+/* -------------------------
+   Metrics / Progress lists
+   ------------------------- */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.metric-panel {
+  padding: var(--space-lg);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.metric-panel h2 {
+  margin: 0 0 var(--space-md);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.progress-list {
+  display: grid;
+  gap: var(--space-md);
+}
+.progress-list div {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 1fr 40px;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 12px;
+  color: var(--muted);
+}
+.progress-list meter {
+  width: 100%;
+  height: 8px;
+  border-radius: 20px;
+}
+.progress-list meter::-webkit-meter-bar {
+  background: #f0f0f0;
+  border-radius: 20px;
+}
+.progress-list meter::-webkit-meter-optimum-value {
+  background: var(--cyan);
+  border-radius: 20px;
+}
+.progress-list strong {
+  color: var(--green);
+  font-weight: 600;
+}
+
+/* -------------------------
+   Badges
+   ------------------------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.badge--blue { background: #e7f8ff; color: var(--navy); }
+.badge--violet { background: #f3e8ff; color: #71277a; }
+
+/* -------------------------
+   Groups grid and cards
+   ------------------------- */
+/* Container: two columns desktop, one column tablet/mobile */
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: var(--space-lg);
+}
+
+/* Card base */
+.group-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  min-height: 160px;
+}
+
+/* Banner */
+.group-card__banner {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.group-card__title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+/* Body */
+.group-card__body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+  font-size: 12px;
+}
+.group-card .meta { color: var(--muted); font-size: 13px; }
+.group-card .label { font-weight:600; color:var(--muted); font-size:12px; }
+
+/* Footer / actions */
+.group-card__footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  background: var(--shadow);
+}
+
+/* Banner colors by program level */
+.group-card--tecnologo .group-card__banner { background: #e6fff0; }
+.group-card--tecnico   .group-card__banner { background: #e6fbfe; }
+.group-card--operario  .group-card__banner { background: #f7ecf9; }
+
+/* -------------------------
+   Info cards (apprentice detail)
+   ------------------------- */
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.detail-column {
+    display: grid;
+    gap: 24px;
+}
+
+.hero-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.hero-card h1 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.1;
+}
+
+.hero-card p {
+    margin: 2px 0 0;
+    font-size: 14px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--green);
+  text-decoration: none;
+  font-size: 16px;
+  margin-bottom: 24px;
+  padding-top: 24px;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+.back-link:hover { color: var(--darkgreen); }
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.info-card__icon {
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:inline-grid;
+  place-items:center;
+  color:var(--text);
+  background: rgba(255,255,255,0.6);
+  font-weight:600;
+  flex:0 0 40px;
+}
+.info-card h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.info-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+dl {
+    margin: 0;
+    display: grid;
+    gap: 16px;
+}
+
+dt {
+    font-size: 14px;
+    line-height: 1.15;
+}
+
+dd {
+    margin: -14px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.15;
+}
+
+/* Banner colors for info-cards by level */
+.info-card--tecnologo .info-card__banner { background: #e6fff0; }
+.info-card--tecnico   .info-card__banner { background: #e6fbfe; }
+.info-card--operario  .info-card__banner { background: #f7ecf9; }
+
+/* -------------------------
+   Lists and small components
+   ------------------------- */
+.apprentice-list { list-style:none; padding:0; margin:0; }
+.apprentice-list li { padding:.35rem 0; border-bottom:1px solid #f0f0f0; }
+
+.detail-list { display:grid; grid-template-columns: 160px 1fr; gap:.5rem 1rem; }
+.detail-list dt { font-weight:700; color:var(--text); }
+.detail-list dd { margin:0; color:var(--muted); }
+
+/* -------------------------
+   Utilities and small helpers
+   ------------------------- */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+/* -------------------------
+   Responsive rules
+   Consolidated at the end for clarity
+   ------------------------- */
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .groups-grid { grid-template-columns: 1fr; }
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .info-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-card,
+  .group-card,
+  .info-card { padding: 16px; }
+  .stat-card h3 { font-size: 13px; }
+  .stat-card strong { font-size: 16px; }
+  .metric-panel { padding: var(--space-md); }
+}
+
+/* -------------------------
+   Visual tweaks (fine tuning)
+   ------------------------- */
+.group-card__title, .group-card .meta, .group-card .label { line-height: 1.1; }
+.info-card__title, .info-card__subtitle { line-height: 1; }

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Aprendices | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <h1>Gestion de aprendices</h1>
+    </div>
+    {% if current_user.role in ['docente', 'super_admin'] %}
+    <a class="primary-btn" href="{{ url_for('apprentice_create') }}">+ Anadir aprendiz</a>
+    {% endif %}
+</section>
+
+<section class="panel filter-panel">
+    <div class="panel__header panel__header--left">
+        <span class="filter-icon">≡</span>
+        <h2>Filtros y busqueda</h2>
+    </div>
+    <form class="filters-grid filters-grid--four" method="get">
+        <input type="text" name="search" placeholder="Buscar por nombre o documento..." value="{{ request.args.get('search', '') }}">
+        <select name="group_number">
+            <option value="">Todos los grupos</option>
+            {% for group in groups %}
+            <option value="{{ group.group_number }}" {% if request.args.get('group_number') == group.group_number %}selected{% endif %}>{{ group.group_number }}</option>
+            {% endfor %}
+        </select>
+        <select name="ep_modality">
+            <option value="">Todas las modalidades</option>
+            {% for value, label in field_select_options.ep_modality %}
+            {% if value %}<option value="{{ value }}" {% if request.args.get('ep_modality') == value %}selected{% endif %}>{{ label }}</option>{% endif %}
+            {% endfor %}
+        </select>
+        <select name="status">
+            <option value="">Todos los estados</option>
+            {% for value, label in field_select_options.sofia_status %}
+            {% if value %}<option value="{{ value }}" {% if request.args.get('status') == value %}selected{% endif %}>{{ label }}</option>{% endif %}
+            {% endfor %}
+        </select>
+        <button type="submit" class="sr-only">Filtrar</button>
+    </form>
+    <div class="toolbar">
+        <span>Mostrando {{ apprentices|length }} de {{ apprentices|length }} aprendices</span>
+        <div class="toolbar__actions">
+            {% if current_user.role in ['docente', 'super_admin'] %}
+            <form method="post" action="{{ url_for('import_apprentices') }}" enctype="multipart/form-data" class="inline-upload">
+                <label class="link-action link-action--green">↑ Importar datos<input type="file" name="file" accept=".xlsx" required onchange="this.form.submit()"></label>
+            </form>
+            {% endif %}
+            <a class="link-action" href="{{ url_for('export_apprentices') }}">↓ Exportar datos</a>
+        </div>
+    </div>
+</section>
+
+<section class="table-card">
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre del aprendiz</th>
+                    <th>Grupo</th>
+                    <th>Programa</th>
+                    <th>Nivel</th>
+                    <th>Modalidad etapa practica</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apprentice in apprentices %}
+                <tr>
+                    <td>{{ apprentice.document_number }}<br><small>{{ apprentice.document_type }}</small></td>
+                    <td>{{ apprentice.full_name }}<br><small>{{ apprentice.email }}</small></td>
+                    <td>{{ apprentice.group_number }}</td>
+                    <td>{{ apprentice.program_name }}</td>
+                    <td>{{ apprentice.program_level or 'Tecnologo' }}</td>
+                    <td>{{ apprentice.ep_modality or 'Sin definir' }}</td>
+                    <td>{{ apprentice.sofia_status or 'Sin estado' }}</td>
+                    <td class="actions-cell">
+                        <a class="icon-action icon-action--view" title="Ver" href="{{ url_for('apprentice_detail', apprentice_id=apprentice.id) }}">↗</a>
+                        {% if current_user.role in ['docente', 'super_admin'] or (current_user.role == 'aprendiz' and apprentice.student_user_id == current_user.id) %}
+                        <a class="icon-action icon-action--edit" title="Editar" href="{{ url_for('apprentice_edit', apprentice_id=apprentice.id) }}">⌁</a>
+                        {% endif %}
+                        {% if current_user.role in ['docente', 'super_admin'] %}
+                        <form method="post" action="{{ url_for('apprentice_delete', apprentice_id=apprentice.id) }}" onsubmit="return confirm('Eliminar este aprendiz?');">
+                            <button type="submit" class="icon-action icon-action--delete" title="Eliminar">⌫</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="empty-state">No hay aprendices registrados para mostrar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,85 @@
+{# templates/groups/create.html #}
+{% extends "base.html" %}
+{% block title %}{% if editing %}Editar ficha{% else %}Crear ficha{% endif %} - GIA{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <header class="section-header">
+    <h1>{% if editing %}Editar ficha{% else %}Crear ficha{% endif %}</h1>
+    <p class="muted">{% if editing %}Modifica los datos de la ficha{% else %}Rellena el formulario para crear una nueva ficha{% endif %}</p>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {# Determinar acción del formulario: create o edit #}
+  {% if editing and group is defined %}
+    {% set form_action = url_for('groups.edit', id=group.id) %}
+  {% else %}
+    {% set form_action = url_for('groups.create') %}
+  {% endif %}
+
+  <form method="post" action="{{ form_action }}" class="form-grid">
+    {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+
+    <label for="group_number">Número de ficha</label>
+    <input id="group_number" name="group_number" type="text"
+           value="{{ request.form.group_number or (group.group_number if group is defined and group.group_number else '') }}"
+           required>
+
+    <label for="program_name">Nombre del programa</label>
+    <input id="program_name" name="program_name" type="text"
+           value="{{ request.form.program_name or (group.program_name if group is defined and group.program_name else '') }}"
+           required>
+
+    <label for="program_level">Nivel</label>
+    <input id="program_level" name="program_level" type="text"
+           value="{{ request.form.program_level or (group.program_level if group is defined and group.program_level else '') }}">
+
+    <label for="municipality">Municipio</label>
+    <input id="municipality" name="municipality" type="text"
+           value="{{ request.form.municipality or (group.municipality if group is defined and group.municipality else '') }}">
+
+    <label for="modality">Modalidad</label>
+    <input id="modality" name="modality" type="text"
+           value="{{ request.form.modality or (group.modality if group is defined and group.modality else '') }}">
+
+    <label for="lead_instructor">Instructor líder</label>
+    <input id="lead_instructor" name="lead_instructor" type="text"
+           value="{{ request.form.lead_instructor or (group.lead_instructor if group is defined and group.lead_instructor else '') }}">
+
+    <label for="followup_instructor">Instructor EP</label>
+    <input id="followup_instructor" name="followup_instructor" type="text"
+           value="{{ request.form.followup_instructor or (group.followup_instructor if group is defined and group.followup_instructor else '') }}">
+
+    <div class="form-actions" style="margin-top:1rem;">
+      <button type="submit" class="btn btn--primary">{% if editing %}Guardar cambios{% else %}Crear ficha{% endif %}</button>
+      <a class="btn" href="{{ url_for('groups.index') }}">Cancelar</a>
+      {% if editing and has_endpoint('groups.delete') %}
+        <form method="post" action="{{ url_for('groups.delete', id=group.id) }}" style="display:inline" onsubmit="return confirm('Eliminar esta ficha?');">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% endif %}
+          <button type="submit" class="btn btn--danger">Eliminar</button>
+        </form>
+      {% endif %}
+    </div>
+  </form>
+</section>
+
+<style>
+.form-grid { max-width:720px; display:block; }
+.form-grid label { display:block; margin-top:.75rem; font-weight:600; }
+.form-grid input { width:100%; padding:.5rem; border:1px solid #ddd; border-radius:4px; }
+.form-actions .btn { margin-right:.5rem; }
+</style>
+{% endblock %}

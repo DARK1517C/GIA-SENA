@@ -1,0 +1,235 @@
+/* ===========================
+   PANEL DE FILTROS Y BÚSQUEDA
+   =========================== */
+.filter-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.panel__header--left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-icon {
+  font-size: 1.2rem;
+  color: var(--navy);
+}
+
+/* Contenedor de filtros estilo Fluent 2 */
+.filters-grid--four {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+/* Inputs y combobox uniformes */
+.filters-grid--four input,
+.filters-grid--four select,
+.filters-grid--four .combobox input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #d2d2d2;
+  border-radius: var(--space-xs);
+  padding: 0 12px;
+  font-size: 0.95rem;
+  color: #222;
+  background-color: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+/* Hover y focus estilo Fluent */
+.filters-grid--four input:hover,
+.filters-grid--four select:hover,
+.filters-grid--four .combobox input:hover,
+.filters-grid--four input:focus,
+.filters-grid--four select:focus,
+.filters-grid--four .combobox input:focus {
+  border-color: var(--darkgreen);
+  outline: none;
+}
+
+/* Searchbox con icono */
+.filters-grid--four input[name="search"] {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+/* Select con flecha Fluent 2 */
+.filters-grid--four select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"), var(--line);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+/* Opciones internas */
+.filters-grid--four select option {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+/* Combobox personalizado */
+.combobox {
+  position: relative;
+}
+
+.combobox-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #d2d2d2;
+  border-radius: var(--space-sm);
+  background: #fff;
+  z-index: 10;
+  display: none;
+}
+
+.combobox-list.active {
+  display: block;
+}
+
+.combobox-list option {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.combobox-list option:hover {
+  background: #f0f0f0;
+}
+
+/* Barra inferior */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.toolbar__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.link-action {
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.link-action--green {
+  color: var(--green);
+}
+
+/* ===========================
+   TABLA DE APRENDICES
+   =========================== */
+.table-card {
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+/* Encabezado */
+.data-table thead {
+  background: #e6f5ff;
+}
+
+.data-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 20px;
+}
+
+/* Celdas */
+.data-table td {
+  padding: 10px 20px;
+  font-size: 12px;
+}
+
+/* Filas alternadas estilo Microsoft */
+.data-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* Hover */
+.data-table tbody tr:hover {
+   background: rgba(0, 0, 0, 0.1);
+  transition: background 0.2s ease;
+}
+
+/* Acciones */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-action {
+  font-size: 1rem;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  background: none;
+  border: none;
+}
+
+.icon-action:hover {
+  transform: scale(1.1);
+}
+
+.icon-action--view {
+  color: var(--navy);
+}
+
+.icon-action--edit {
+  color: var(--green);
+}
+
+.icon-action--delete {
+  color: var(--danger);
+}
+
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+}

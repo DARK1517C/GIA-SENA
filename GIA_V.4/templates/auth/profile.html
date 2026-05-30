@@ -1,0 +1,133 @@
+<!-- templates/auth/profile.html -->
+{% extends "base.html" %}
+
+{% block title %}Mi perfil{% endblock %}
+
+{% block content %}
+<section class="profile page-section">
+  <header class="section-header">
+    <h1>Mi perfil</h1>
+    <p class="muted">Actualiza tu información personal y credenciales de acceso.</p>
+  </header>
+
+  {# Flash messages (re-usable) #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="profile-grid">
+    <aside class="profile-card">
+      <div class="avatar-large">{{ (current_user.full_name[:2]|upper) if (current_user and current_user.full_name) else '' }}</div>
+      <h2 class="profile-name">{{ current_user.full_name if current_user and current_user.full_name else '—' }}</h2>
+      <p class="profile-role">{{ (role_labels[current_user.role] if role_labels is defined and current_user and current_user.role in role_labels else current_user.role) or '—' }}</p>
+
+      <ul class="profile-meta">
+        <li><strong>Usuario</strong><br>{{ current_user.username if current_user else '—' }}</li>
+        <li><strong>Email</strong><br>{{ current_user.email if current_user and current_user.email else '—' }}</li>
+        <li><strong>Documento</strong><br>
+          {{ (current_user.document_type ~ ' ' ~ current_user.document_number) if (current_user and current_user.document_type and current_user.document_number) else '—' }}
+        </li>
+      </ul>
+
+      <nav class="profile-actions">
+        <a class="btn" href="{{ url_for('dashboard.index') }}">Volver al panel</a>
+        <a class="btn btn--danger" href="{{ url_for('auth.logout') }}">Cerrar sesión</a>
+      </nav>
+    </aside>
+
+    <div class="profile-form-wrapper">
+      <form method="post" action="{{ url_for('auth.profile') }}" class="profile-form" novalidate>
+        {# If you use Flask-WTF include {{ form.hidden_tag() }} here #}
+        {% if csrf_token is defined %}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
+
+        <fieldset>
+          <legend>Información personal</legend>
+
+          <label for="full_name">Nombre completo</label>
+          <input id="full_name" name="full_name" type="text" value="{{ request.form.full_name or (current_user.full_name if current_user and current_user.full_name else '') }}" required>
+
+          <label for="username">Usuario</label>
+          <input id="username" name="username" type="text" value="{{ request.form.username or (current_user.username if current_user else '') }}" required>
+
+          <label for="email">Correo electrónico</label>
+          <input id="email" name="email" type="email" value="{{ request.form.email or (current_user.email if current_user and current_user.email else '') }}" required>
+
+          <div class="two-columns">
+            <div>
+              <label for="document_type">Tipo de documento</label>
+              <input id="document_type" name="document_type" type="text" value="{{ request.form.document_type or (current_user.document_type if current_user and current_user.document_type else '') }}">
+            </div>
+            <div>
+              <label for="document_number">Número de documento</label>
+              <input id="document_number" name="document_number" type="text" value="{{ request.form.document_number or (current_user.document_number if current_user and current_user.document_number else '') }}">
+            </div>
+          </div>
+
+          <label for="role">Rol</label>
+          <input id="role" name="role" type="text" value="{{ (role_labels[current_user.role] if role_labels is defined and current_user and current_user.role in role_labels else current_user.role) or '' }}" readonly>
+
+          <label for="active">Activo</label>
+          <input id="active" name="active" type="checkbox" {% if (request.form.active is defined and request.form.active) or (current_user and current_user.active) %}checked{% endif %}>
+        </fieldset>
+
+        <fieldset>
+          <legend>Cambiar contraseña</legend>
+          <p class="muted">Deja los campos vacíos si no deseas cambiar la contraseña.</p>
+
+          <label for="current_password">Contraseña actual</label>
+          <input id="current_password" name="current_password" type="password" autocomplete="current-password">
+
+          <label for="new_password">Nueva contraseña</label>
+          <input id="new_password" name="new_password" type="password" autocomplete="new-password">
+
+          <label for="confirm_password">Confirmar nueva contraseña</label>
+          <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password">
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn--primary">Guardar cambios</button>
+          <a class="btn" href="{{ url_for('dashboard.index') }}">Cancelar</a>
+        </div>
+      </form>
+
+      <section class="profile-help">
+        <h3>Consejos</h3>
+        <ul>
+          <li>Usa un correo válido para notificaciones.</li>
+          <li>La contraseña debe tener al menos 8 caracteres.</li>
+          <li>Si cambias el usuario o email, es posible que necesites volver a iniciar sesión.</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</section>
+
+<style>
+/* Scoped minimal styles to keep layout readable until your CSS loads */
+.profile { padding: 1.25rem; }
+.profile-grid { display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; align-items: start; }
+.profile-card { background:#fff; padding:1rem; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.avatar-large { width:72px; height:72px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.25rem; background:#f0f0f0; margin-bottom:.5rem; }
+.profile-name { margin:0 0 .25rem 0; }
+.profile-meta { list-style:none; padding:0; margin:.5rem 0 0 0; font-size:.95rem; color:#333; }
+.profile-meta li { margin-bottom:.5rem; }
+.profile-form { background:#fff; padding:1rem; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.profile-form label { display:block; margin-top:.75rem; font-weight:600; }
+.profile-form input[type="text"], .profile-form input[type="email"], .profile-form input[type="password"] { width:100%; padding:.5rem; border:1px solid #ddd; border-radius:4px; }
+.two-columns { display:flex; gap:1rem; }
+.two-columns > div { flex:1; }
+.form-actions { margin-top:1rem; display:flex; gap:.5rem; align-items:center; }
+.btn { display:inline-block; padding:.5rem .75rem; border-radius:4px; text-decoration:none; background:#eee; color:#111; }
+.btn--primary { background:#0b6; color:#fff; }
+.btn--danger { background:#e44; color:#fff; }
+.muted { color:#666; font-size:.95rem; }
+</style>
+{% endblock %}

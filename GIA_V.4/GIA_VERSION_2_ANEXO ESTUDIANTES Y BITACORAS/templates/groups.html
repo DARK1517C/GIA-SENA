@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Fichas | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Seguimiento formativo</p>
+        <h1>Gestión de Fichas</h1>
+        <p>Consulta, organiza y administra las fichas académicas del sistema.</p>
+    </div>
+    {% if current_user.role in ['docente', 'super_admin'] %}
+    <a class="primary-btn" href="{{ url_for('group_create') }}">+ Nueva ficha</a>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <div class="panel__header">
+        <h2>Filtros y búsqueda</h2>
+        {% if current_user.role in ['docente', 'super_admin'] %}
+        <details class="menu-dots">
+            <summary class="ghost-btn ghost-btn--icon">...</summary>
+            <button type="submit" class="danger-btn" form="bulk-groups-form" onclick="return confirm('¿Eliminar las fichas seleccionadas?');">Eliminar seleccionadas</button>
+        </details>
+        {% endif %}
+    </div>
+    <form class="filters-grid" method="get">
+        <input type="text" name="search" placeholder="Buscar por ficha, programa o instructor" value="{{ request.args.get('search', '') }}">
+        <input type="text" name="municipality" placeholder="Digita municipio" value="{{ request.args.get('municipality', '') }}">
+        <input type="text" name="modality" placeholder="Digita modalidad" value="{{ request.args.get('modality', '') }}">
+        <input type="text" name="quick_search" placeholder="Búsqueda rápida libre" value="{{ request.args.get('quick_search', '') }}">
+        <button type="submit" class="ghost-btn">Filtrar</button>
+    </form>
+    <div class="toolbar">
+        <span>Mostrando {{ groups|length }} fichas</span>
+        <div class="toolbar__actions">
+            <a class="ghost-btn" href="{{ url_for('export_groups') }}">Exportar XLSX</a>
+            {% if current_user.role in ['docente', 'super_admin'] %}
+            <form method="post" action="{{ url_for('import_groups') }}" enctype="multipart/form-data" class="inline-upload">
+                <input type="file" name="file" accept=".xlsx" required>
+                <button type="submit" class="ghost-btn">Importar XLSX</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if current_user.role in ['docente', 'super_admin'] %}
+<form id="bulk-groups-form" method="post" action="{{ url_for('group_bulk_delete') }}" data-bulk-form>
+    <div class="bulk-bar panel">
+        <label class="select-all-pill">
+            <input type="checkbox" data-select-all>
+            <span class="select-all-pill__box"></span>
+            <span data-select-count>Seleccionar todo</span>
+        </label>
+        <button type="submit" class="danger-btn" onclick="return confirm('¿Eliminar las fichas seleccionadas?');">Eliminar seleccionadas</button>
+    </div>
+</form>
+{% endif %}
+
+<section class="card-grid">
+    {% for group in groups %}
+    <article class="group-card">
+        {% if current_user.role in ['docente', 'super_admin'] %}
+        <div class="group-card__selector">
+            <label><input type="checkbox" name="selected_ids" value="{{ group.id }}" data-select-item form="bulk-groups-form"> Seleccionar</label>
+        </div>
+        {% endif %}
+        <div class="group-card__top">
+            <div>
+                <h3>Ficha {{ group.group_number }}</h3>
+                <p>{{ group.program_name }}</p>
+            </div>
+            <span class="badge badge--green">{{ group.sofia_group_status or 'Sin estado' }}</span>
+        </div>
+        <div class="group-card__meta">
+            <span>{{ group.program_level }}</span>
+            <span>{{ group.municipality }} / {{ group.modality }}</span>
+            <span>Inicio: {{ group.group_start_date }}</span>
+            <span>Fin: {{ group.training_end_date }}</span>
+        </div>
+        <div class="group-card__actions">
+            <a class="ghost-btn" href="{{ url_for('group_detail', group_id=group.id) }}">Ver</a>
+            {% if current_user.role in ['docente', 'super_admin'] %}
+            <a class="ghost-btn" href="{{ url_for('group_edit', group_id=group.id) }}">Editar</a>
+            <form method="post" action="{{ url_for('group_delete', group_id=group.id) }}" onsubmit="return confirm('¿Eliminar esta ficha?');">
+                <button type="submit" class="danger-btn">Eliminar</button>
+            </form>
+            {% endif %}
+        </div>
+    </article>
+    {% else %}
+    <div class="panel"><p class="empty-state">No hay fichas registradas para mostrar.</p></div>
+    {% endfor %}
+</section>
+{% endblock %}

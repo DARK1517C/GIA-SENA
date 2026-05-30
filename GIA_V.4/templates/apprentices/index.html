@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Aprendices - GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+  <div><h1>Gestión de aprendices</h1></div>
+
+  {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('apprentices.create') %}
+    <a class="primary-btn" href="{{ url_for('apprentices.create') }}">Añadir aprendiz</a>
+  {% endif %}
+</section>
+
+<section class="panel filter-panel">
+  <div class="panel__header panel__header--left">
+    <span class="filter-icon">≡</span>
+    <h2>Filtros y búsqueda</h2>
+  </div>
+
+  <form class="filters-grid filters-grid--four" method="get" action="{{ url_for('apprentices.index') }}">
+    <input type="text" name="search" placeholder="Buscar por nombre o documento..." value="{{ request.args.get('search', '') }}">
+    <input type="text" name="group_number" placeholder="Todos los grupos" value="{{ request.args.get('group_number', '') }}">
+    <input type="text" name="ep_modality" placeholder="Todas las modalidades" value="{{ request.args.get('ep_modality', '') }}">
+    <input type="text" name="status" placeholder="Todos los estados" value="{{ request.args.get('status', '') }}">
+    <button type="submit" class="sr-only">Filtrar</button>
+  </form>
+
+  <div class="toolbar">
+    <span>Mostrando {{ apprentices|length }} de {{ apprentices|length }} aprendices</span>
+    <div class="toolbar__actions">
+      {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('apprentices.import_excel') %}
+        <form method="post" action="{{ url_for('apprentices.import_excel') }}" enctype="multipart/form-data" class="inline-upload">
+          <label class="link-action link-action--green">↑ Importar datos<input type="file" name="file" accept=".xlsx" required onchange="this.form.submit()"></label>
+        </form>
+      {% endif %}
+
+      {% if has_endpoint('apprentices.export_all') %}
+        <a class="link-action" href="{{ url_for('apprentices.export_all') }}">↓ Exportar datos</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="table-card">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre del aprendiz</th>
+          <th>Grupo</th>
+          <th>Programa</th>
+          <th>Nivel</th>
+          <th>Modalidad etapa práctica</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for apprentice in apprentices %}
+          <tr>
+            <td>{{ apprentice.document_number }}<br><small>{{ apprentice.document_type }}</small></td>
+            <td>{{ apprentice.full_name }}<br><small>{{ apprentice.email }}</small></td>
+            <td>{{ apprentice.group_number or '—' }}</td>
+            <td>{{ apprentice.program_name or '—' }}</td>
+            <td>{{ apprentice.program_level or 'Tecnólogo' }}</td>
+            <td>{{ apprentice.ep_modality or 'Sin definir' }}</td>
+            <td>{{ apprentice.sofia_status or 'Sin estado' }}</td>
+            <td class="actions-cell">
+              {% if has_endpoint('apprentices.detail') %}
+                <a class="icon-action icon-action--view" title="Ver" href="{{ url_for('apprentices.detail', id=apprentice.id) }}">↗</a>
+              {% endif %}
+
+              {# Editar: docentes, super_admin o el propio aprendiz (si está vinculado) #}
+              {% set can_edit = (_user and _user.role in ['docente', 'super_admin']) or (_user and _user.role == 'aprendiz' and apprentice.student_user_id == _user.id) %}
+              {% if can_edit and has_endpoint('apprentices.edit') %}
+                <a class="icon-action icon-action--edit" title="Editar" href="{{ url_for('apprentices.edit', id=apprentice.id) }}">⌁</a>
+              {% endif %}
+
+              {# Eliminar solo para roles con permiso #}
+              {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('apprentices.delete') %}
+                <form method="post" action="{{ url_for('apprentices.delete', id=apprentice.id) }}" onsubmit="return confirm('Eliminar este aprendiz?');" style="display:inline">
+                  {% if csrf_token is defined %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  {% endif %}
+                  <button type="submit" class="icon-action icon-action--delete" title="Eliminar">⌫</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="empty-state">No hay aprendices registrados para mostrar.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}

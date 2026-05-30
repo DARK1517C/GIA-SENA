@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <p class="eyebrow">Formulario</p>
+        <h1>{{ page_title }}</h1>
+        <p>Completa la información respetando el orden institucional definido.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <form method="post" class="record-grid">
+        {% for key, label in fields %}
+        <label>
+            <span>{{ label }}</span>
+            <input type="text" name="{{ key }}" value="{{ record|attr(key) if record else '' }}" {% if loop.index <= 6 %}required{% endif %}>
+        </label>
+        {% endfor %}
+        <div class="form-actions">
+            <button type="submit" class="primary-btn">{{ submit_label }}</button>
+            <a class="ghost-btn" href="{{ cancel_url }}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

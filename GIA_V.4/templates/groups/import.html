@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Importar grupos{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <h1>Importar grupos</h1>
+  <p class="muted">Sube un archivo Excel con la plantilla de referencia para importar grupos y aprendices.</p>
+
+  <form method="post" action="{{ url_for('groups.import_groups') }}" enctype="multipart/form-data" class="inline-upload">
+    <label for="file">Archivo (xlsx)</label>
+    <input id="file" name="file" type="file" accept=".xlsx" required>
+    <div class="form-actions" style="margin-top:1rem;">
+      <button type="submit" class="btn btn--primary">Subir e importar</button>
+      <a class="btn" href="{{ url_for('groups.index') }}">Cancelar</a>
+    </div>
+  </form>
+
+  <section style="margin-top:1rem;">
+    <h3>Instrucciones</h3>
+    <ul>
+      <li>Usa la plantilla de referencia para asegurar columnas y formatos correctos.</li>
+      <li>El proceso importará grupos y aprendices según las hojas presentes.</li>
+    </ul>
+  </section>
+</section>
+{% endblock %}

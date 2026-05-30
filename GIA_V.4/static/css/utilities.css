@@ -1,0 +1,5 @@
+.empty-state { padding: var(--space-lg); text-align: center; color: var(--muted); font-size: 14px; }
+.flash-stack { display: grid; gap: var(--space-sm); margin-bottom: var(--space-md); }
+.flash { padding: var(--space-sm) var(--space-md); border-radius: var(--space-xs); background: var(--surface); box-shadow: var(--shadow); }
+.flash--success { border-left: 4px solid var(--green); }
+.flash--error { border-left: 4px solid var(--danger); }

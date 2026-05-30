@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Aprendices | GIA{% endblock %}
+{% block content %}
+<section class="page-head page-head--split">
+    <div>
+        <p class="eyebrow">Módulo principal</p>
+        <h1>Gestión de Aprendices</h1>
+        <p>Administra y consulta la información de los aprendices.</p>
+    </div>
+    {% if current_user.role in ['docente', 'super_admin'] %}
+    <a class="primary-btn" href="{{ url_for('apprentice_create') }}">+ Nuevo aprendiz</a>
+    {% endif %}
+</section>
+
+<section class="panel">
+    <div class="panel__header"><h2>Filtros y búsqueda</h2></div>
+    <form class="filters-grid" method="get">
+        <input type="text" name="search" placeholder="Buscar por nombre o documento" value="{{ request.args.get('search', '') }}">
+        <select name="group_number">
+            <option value="">Todas las fichas</option>
+            {% for group in groups %}
+            <option value="{{ group.group_number }}" {% if request.args.get('group_number') == group.group_number %}selected{% endif %}>{{ group.group_number }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="ep_modality" placeholder="Todas las modalidades" value="{{ request.args.get('ep_modality', '') }}">
+        <input type="text" name="status" placeholder="Todos los estados" value="{{ request.args.get('status', '') }}">
+        <button type="submit" class="ghost-btn">Filtrar</button>
+    </form>
+    <div class="toolbar">
+        <span>Mostrando {{ apprentices|length }} aprendices</span>
+        <div class="toolbar__actions">
+            <a class="ghost-btn" href="{{ url_for('export_apprentices') }}">Exportar XLSX</a>
+            {% if current_user.role in ['docente', 'super_admin'] %}
+            <form method="post" action="{{ url_for('import_apprentices') }}" enctype="multipart/form-data" class="inline-upload">
+                <input type="file" name="file" accept=".xlsx" required>
+                <button type="submit" class="ghost-btn">Importar XLSX</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre completo</th>
+                    <th>Ficha</th>
+                    <th>Programa</th>
+                    <th>Modalidad EP</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apprentice in apprentices %}
+                <tr>
+                    <td>{{ apprentice.document_number }}<br><small>{{ apprentice.document_type }}</small></td>
+                    <td>{{ apprentice.full_name }}<br><small>{{ apprentice.email }}</small></td>
+                    <td>{{ apprentice.group_number }}</td>
+                    <td>{{ apprentice.program_name }}</td>
+                    <td><span class="badge badge--blue">{{ apprentice.ep_modality or 'Sin definir' }}</span></td>
+                    <td><span class="badge badge--green">{{ apprentice.sofia_status or 'Sin estado' }}</span></td>
+                    <td class="actions-cell">
+                        <a class="ghost-btn" href="{{ url_for('apprentice_detail', apprentice_id=apprentice.id) }}">Ver</a>
+                        {% if current_user.role in ['docente', 'super_admin'] or (current_user.role == 'aprendiz' and apprentice.student_user_id == current_user.id) %}
+                        <a class="ghost-btn" href="{{ url_for('apprentice_edit', apprentice_id=apprentice.id) }}">Editar</a>
+                        {% endif %}
+                        {% if current_user.role in ['docente', 'super_admin'] %}
+                        <form method="post" action="{{ url_for('apprentice_delete', apprentice_id=apprentice.id) }}" onsubmit="return confirm('¿Eliminar este aprendiz?');">
+                            <button type="submit" class="danger-btn">Eliminar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty-state">No hay aprendices registrados para mostrar.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

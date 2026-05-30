@@ -1,0 +1,84 @@
+{# templates/apprentices/create.html #}
+{% extends "base.html" %}
+
+{% block title %}Crear aprendiz{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <h1>Crear aprendiz</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-stack">
+        {% for category, message in messages %}
+          <div class="flash flash--{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" action="{{ url_for('apprentices.create') }}" class="simple-form">
+    {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+
+    <label for="group_number">Número de ficha *</label>
+    <input id="group_number" name="group_number" type="text" value="{{ request.form.group_number or '' }}" required>
+
+    <label for="first_names">Nombres *</label>
+    <input id="first_names" name="first_names" type="text" value="{{ request.form.first_names or '' }}" required>
+
+    <label for="last_names">Apellidos *</label>
+    <input id="last_names" name="last_names" type="text" value="{{ request.form.last_names or '' }}" required>
+
+    <label for="document_type">Tipo de documento</label>
+    <input id="document_type" name="document_type" type="text" value="{{ request.form.document_type or 'CC' }}">
+
+    <label for="document_number">Número de documento</label>
+    <input id="document_number" name="document_number" type="text" value="{{ request.form.document_number or '' }}">
+
+    <label for="email">Correo electrónico</label>
+    <input id="email" name="email" type="email" value="{{ request.form.email or '' }}">
+
+    <label for="phone">Teléfono</label>
+    <input id="phone" name="phone" type="text" value="{{ request.form.phone or '' }}">
+
+    <label for="municipality_origin">Municipio origen</label>
+    <input id="municipality_origin" name="municipality_origin" type="text" value="{{ request.form.municipality_origin or '' }}">
+
+    <label for="program_name">Programa</label>
+    <input id="program_name" name="program_name" type="text" value="{{ request.form.program_name or '' }}">
+
+    <label for="lead_instructor">Instructor líder</label>
+    <input id="lead_instructor" name="lead_instructor" type="text" value="{{ request.form.lead_instructor or '' }}">
+
+    <label for="followup_instructor">Instructor EP</label>
+    <input id="followup_instructor" name="followup_instructor" type="text" value="{{ request.form.followup_instructor or '' }}">
+
+    <label for="ep_modality">Modalidad EP</label>
+    <select id="ep_modality" name="ep_modality">
+      <option value="">--</option>
+      {% for val, label in field_select_options.ep_modality %}
+        <option value="{{ val }}" {% if request.form.ep_modality == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="practice_start_date">Inicio práctica</label>
+    <input id="practice_start_date" name="practice_start_date" type="date" value="{{ request.form.practice_start_date or '' }}">
+
+    <label for="practice_end_date">Fin práctica</label>
+    <input id="practice_end_date" name="practice_end_date" type="date" value="{{ request.form.practice_end_date or '' }}">
+
+    <div class="form-actions" style="margin-top:1rem;">
+      <button type="submit" class="btn btn--primary">Crear aprendiz</button>
+      <a class="btn" href="{{ url_for('apprentices.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+
+<style>
+.simple-form label { display:block; margin-top:.75rem; font-weight:600; }
+.simple-form input, .simple-form select { width:100%; padding:.5rem; border:1px solid #ddd; border-radius:4px; }
+.form-actions .btn { margin-right:.5rem; }
+</style>
+{% endblock %}

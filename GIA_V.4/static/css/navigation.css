@@ -1,0 +1,185 @@
+/* === TOPBAR GENERAL === */
+.topbar {
+  height: 70px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom-left-radius: 8px; /* esquina inferior izquierda */
+  border-bottom-right-radius: 8px; /* esquina inferior derecha */
+  padding: 0 78px;
+}
+
+/* === LOGO === */
+.brand-logo {
+  height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
+/* === NAVEGACIÓN PRINCIPAL === */
+.main-nav {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.main-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  padding: var(--space-sm) 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+/* Sweep line animada desde el centro */
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--cyan);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.main-nav a:hover::after {
+  left: 0;
+  width: 100%;
+}
+
+.main-nav a.active::after {
+  left: 0;
+  width: 100%;
+}
+
+/* === USER MENU === */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Estructura del details */
+.user-menu details {
+  position: relative;
+}
+
+.user-menu summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.user-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Texto del usuario */
+.user-menu__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.user-menu__text strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.user-menu__text small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Avatar */
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background-color: var(--avatar-color, #f7ecf9); /* color suave por defecto */
+}
+
+/* Menú desplegable */
+.user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  min-width: 150px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: none;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.user-menu details[open] .user-menu__dropdown {
+  display: flex;
+}
+
+/* Opciones dentro del menú */
+.user-menu__dropdown a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 14px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.user-menu__dropdown a:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transition: background 0.2s ease;
+}
+
+/* Iconos */
+.nav-icon {
+  font-size: 18px;
+}
+
+/* Opción de cerrar sesión */
+.user-menu__dropdown .danger-link {
+  color: var(--danger); /* rojo institucional */
+  font-weight: 500;
+}
+
+/* === USER MENU SIEMPRE VISIBLE === */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 78px;
+  z-index: 1000; /* asegura que quede por encima del contenido */
+}
+
+/* Ajuste para que el contenido no quede oculto detrás del nav */
+.app-shell {
+  padding-top: 70px; /* igual a la altura del topbar */
+}
+
+/* Excepción: cuando es login, no aplicar app-shell */
+.login-body .app-shell {
+  all: unset; /* elimina todos los estilos heredados */
+}

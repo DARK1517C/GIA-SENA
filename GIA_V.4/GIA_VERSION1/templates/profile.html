@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Mi perfil | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <p class="eyebrow">Cuenta personal</p>
+        <h1>Mi perfil</h1>
+        <p>Actualiza tus datos de acceso y, si eres aprendiz, tu información personal básica.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <form method="post" class="record-grid record-grid--compact">
+        <label>
+            <span>Nombre completo</span>
+            <input type="text" name="full_name" value="{{ current_user.full_name }}" required>
+        </label>
+        <label>
+            <span>Correo electrónico</span>
+            <input type="email" name="email" value="{{ current_user.email or '' }}">
+        </label>
+        <label>
+            <span>Nueva contraseña</span>
+            <input type="password" name="password" placeholder="Opcional">
+        </label>
+        {% if apprentice %}
+        <label>
+            <span>Teléfono</span>
+            <input type="text" name="phone" value="{{ apprentice.phone or '' }}">
+        </label>
+        <label>
+            <span>Municipio de origen</span>
+            <input type="text" name="municipality_origin" value="{{ apprentice.municipality_origin or '' }}">
+        </label>
+        {% endif %}
+        <div class="form-actions">
+            <button type="submit" class="primary-btn">Guardar perfil</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
