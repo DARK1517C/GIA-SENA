@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+    <div>
+        <p class="eyebrow">Formulario</p>
+        <h1>{{ page_title }}</h1>
+        <p>Completa la información respetando el orden institucional definido.</p>
+    </div>
+</section>
+
+<section class="panel">
+    <form method="post" class="record-grid">
+        {% for key, label in fields %}
+        <label>
+            <span>{{ label }}</span>
+            {% set current_value = record|attr(key) if record else '' %}
+            {% if key in field_select_options %}
+            <select name="{{ key }}" {% if loop.index <= 6 %}required{% endif %}>
+                {% for value, option_label in field_select_options[key] %}
+                <option value="{{ value }}" {% if current_value == value %}selected{% endif %}>{{ option_label }}</option>
+                {% endfor %}
+            </select>
+            {% elif key in date_fields %}
+            <input type="date" name="{{ key }}" value="{{ html_date_value(current_value) }}" {% if loop.index <= 6 %}required{% endif %}>
+            {% else %}
+            <input type="text" name="{{ key }}" value="{{ current_value }}" {% if loop.index <= 6 %}required{% endif %}>
+            {% endif %}
+        </label>
+        {% endfor %}
+        <div class="form-actions">
+            <button type="submit" class="primary-btn">{{ submit_label }}</button>
+            <a class="ghost-btn" href="{{ cancel_url }}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}
