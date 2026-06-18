@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{% if editing %}Editar ficha{% else %}Crear ficha{% endif %} - GIA{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>{% if editing %}Editar ficha{% else %}Crear ficha{% endif %}</h1>
+    <p>{% if editing %}Modifica los datos principales de la ficha.{% else %}Crea una ficha y deja lista su informacion de seguimiento.{% endif %}</p>
+  </div>
+</section>
+
+{% if editing and group is defined %}
+  {% set form_action = url_for('groups.edit', id=group.id) %}
+{% else %}
+  {% set form_action = url_for('groups.create') %}
+{% endif %}
+
+<form method="post" action="{{ form_action }}" class="record-form">
+  {% if csrf_token is defined %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% endif %}
+
+  <section class="form-card">
+    <div class="form-card__header">
+      <h2>Datos de la ficha</h2>
+      <p>Identificacion, programa y ubicacion.</p>
+    </div>
+    <div class="form-two-columns">
+      <label>Numero de ficha
+        <input name="group_number" type="text" value="{{ request.form.group_number or (group.group_number if group is defined and group.group_number else '') }}" required>
+      </label>
+      <label>Nombre del programa
+        <input name="program_name" type="text" value="{{ request.form.program_name or (group.program_name if group is defined and group.program_name else '') }}" required>
+      </label>
+      <label>Nivel
+        <input name="program_level" type="text" value="{{ request.form.program_level or (group.program_level if group is defined and group.program_level else '') }}">
+      </label>
+      <label>Modalidad
+        <input name="modality" type="text" value="{{ request.form.modality or (group.modality if group is defined and group.modality else '') }}">
+      </label>
+      <label>Municipio
+        <input name="municipality" type="text" value="{{ request.form.municipality or (group.municipality if group is defined and group.municipality else '') }}">
+      </label>
+      <label>Vigencia
+        <input name="group_validity" type="text" value="{{ request.form.group_validity or (group.group_validity if group is defined and group.group_validity else '') }}">
+      </label>
+      <label>Estado ficha Sofia Plus
+        <input name="sofia_group_status" type="text" value="{{ request.form.sofia_group_status or (group.sofia_group_status if group is defined and group.sofia_group_status else '') }}">
+      </label>
+      <label>Fecha inicio ficha
+        <input name="group_start_date" type="date" value="{{ request.form.group_start_date or (group.group_start_date if group is defined and group.group_start_date else '') }}">
+      </label>
+      <label>Fecha fin formacion
+        <input name="training_end_date" type="date" value="{{ request.form.training_end_date or (group.training_end_date if group is defined and group.training_end_date else '') }}">
+      </label>
+      <label>Inicio etapa productiva
+        <input name="ep_start_date" type="date" value="{{ request.form.ep_start_date or (group.ep_start_date if group is defined and group.ep_start_date else '') }}">
+      </label>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-card__header">
+      <h2>Instructores y estadisticas</h2>
+      <p>Responsables de la ficha y conteos principales.</p>
+    </div>
+    <div class="form-two-columns">
+      <label>Instructor lider
+        <input name="lead_instructor" type="text" value="{{ request.form.lead_instructor or (group.lead_instructor if group is defined and group.lead_instructor else '') }}">
+      </label>
+      <label>Instructor etapa productiva
+        <input name="followup_instructor" type="text" value="{{ request.form.followup_instructor or (group.followup_instructor if group is defined and group.followup_instructor else '') }}">
+      </label>
+      <label>Aprendices en formacion
+        <input name="apprentices_training" type="text" value="{{ request.form.apprentices_training or (group.apprentices_training if group is defined and group.apprentices_training else '') }}">
+      </label>
+      <label>Aprendices habilitados
+        <input name="apprentices_enabled" type="text" value="{{ request.form.apprentices_enabled or (group.apprentices_enabled if group is defined and group.apprentices_enabled else '') }}">
+      </label>
+      <label>Aprendices en practica
+        <input name="apprentices_practice" type="text" value="{{ request.form.apprentices_practice or (group.apprentices_practice if group is defined and group.apprentices_practice else '') }}">
+      </label>
+      <label>Aprendices certificados
+        <input name="apprentices_certified" type="text" value="{{ request.form.apprentices_certified or (group.apprentices_certified if group is defined and group.apprentices_certified else '') }}">
+      </label>
+    </div>
+  </section>
+
+  <div class="form-actions record-form__actions">
+    <button type="submit" class="primary-btn">{% if editing %}Guardar cambios{% else %}Crear ficha{% endif %}</button>
+    <a class="ghost-btn" href="{{ url_for('groups.index') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

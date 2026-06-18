@@ -1,0 +1,35 @@
+/* === ESTADO VACÍO === */
+.empty-state {
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* === CONTENEDOR DE MENSAJES FLASH === */
+.flash-stack {
+  display: grid;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+/* === MENSAJE FLASH BASE === */
+.flash {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--space-xs);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* === VARIANTES DE MENSAJE FLASH === */
+
+/* Éxito: borde verde a la izquierda */
+.flash--success {
+  border-left: 4px solid var(--green);
+}
+
+/* Error: borde rojo a la izquierda */
+.flash--error {
+  border-left: 4px solid var(--danger);
+}
+

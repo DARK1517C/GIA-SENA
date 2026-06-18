@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Aprendices - GIA{% endblock %}
+
+{% block content %}
+<section class="page-head page-head--split">
+  <div><h1>Gestion de aprendices</h1></div>
+  <div class="page-actions">
+    {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('apprentices.create') %}
+      <a class="primary-btn" href="{{ url_for('apprentices.create') }}">Anadir aprendiz</a>
+    {% endif %}
+    {% if _user and _user.role in ['docente', 'super_admin'] %}
+      <details class="action-menu">
+        <summary aria-label="Mas acciones">☰</summary>
+        <button type="button" data-enable-bulk="apprentices-management">Eliminar aprendices</button>
+      </details>
+    {% endif %}
+  </div>
+</section>
+
+<div id="apprentices-management" class="management-list">
+  <section class="panel filter-panel">
+    <div class="panel__header panel__header--left">
+      <span class="filter-icon">≡</span>
+      <h2>Filtros y busqueda</h2>
+    </div>
+
+    <form class="filters-grid filters-grid--four" method="get" action="{{ url_for('apprentices.index') }}">
+      <input type="text" name="search" placeholder="Buscar por nombre o documento..." value="{{ request.args.get('search', '') }}">
+      <input type="text" name="group_number" placeholder="Todas las fichas" value="{{ request.args.get('group_number', '') }}">
+      <input type="text" name="ep_modality" placeholder="Todas las modalidades" value="{{ request.args.get('ep_modality', '') }}">
+      <input type="text" name="status" placeholder="Todos los estados" value="{{ request.args.get('status', '') }}">
+      <button type="submit" class="primary-btn">Filtrar</button>
+      <a class="ghost-btn" href="{{ url_for('apprentices.index') }}">Limpiar</a>
+    </form>
+
+    <div class="toolbar">
+      <span>Mostrando {{ apprentices|length }} de {{ total_apprentices|default(apprentices|length) }} aprendices</span>
+      <div class="toolbar__actions">
+        {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('apprentices.import_excel') %}
+          <form method="post" action="{{ url_for('apprentices.import_excel') }}" enctype="multipart/form-data" class="file-import-form">
+            {% if csrf_token is defined %}
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
+            <input id="apprentices-import-file" class="file-import-input" type="file" name="file" accept=".xlsx,.xls" required>
+            <label class="file-import-picker" for="apprentices-import-file">Seleccionar archivo</label>
+            <span class="file-import-name" data-file-name>Ningun archivo seleccionado</span>
+            <button type="submit" class="primary-btn">Importar</button>
+          </form>
+        {% endif %}
+        {% if has_endpoint('apprentices.export_all') %}
+          <a class="link-action" href="{{ url_for('apprentices.export_all', **request.args) }}">Exportar datos</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="table-card">
+    {% if _user and _user.role in ['docente', 'super_admin'] %}
+    <form id="bulk-apprentices-form" method="post" action="{{ url_for('apprentices.bulk_delete') }}" data-bulk-form class="bulk-selection">
+      {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
+      <div class="bulk-bar bulk-bar--top">
+        <label class="select-all-pill">
+          <input type="checkbox" data-select-all>
+          <span data-select-count>Seleccionar todo</span>
+        </label>
+        <div class="toolbar__actions">
+          <button type="button" class="ghost-btn" data-disable-bulk="apprentices-management">Cancelar</button>
+          <button type="submit" class="danger-btn" onclick="return confirm('Eliminar los aprendices seleccionados?');">Eliminar seleccionados</button>
+        </div>
+      </div>
+    </form>
+    {% endif %}
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            {% if _user and _user.role in ['docente', 'super_admin'] %}
+              <th class="select-cell bulk-only"></th>
+            {% endif %}
+            <th>Documento</th>
+            <th>Nombre del aprendiz</th>
+            <th>Ficha</th>
+            <th>Programa</th>
+            <th>Nivel</th>
+            <th>Modalidad EP</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for apprentice in apprentices %}
+          <tr>
+            {% if _user and _user.role in ['docente', 'super_admin'] %}
+              <td class="select-cell bulk-only">
+                <input type="checkbox" name="selected_ids" value="{{ apprentice.id }}" form="bulk-apprentices-form" data-select-item>
+              </td>
+            {% endif %}
+            <td>{{ apprentice.document_number }}<br><small>{{ apprentice.document_type }}</small></td>
+            <td>{{ apprentice.full_name }}<br><small>{{ apprentice.email or 'Sin correo' }}</small></td>
+            <td>{{ apprentice.group_number or '-' }}</td>
+            <td>{{ apprentice.program_name or '-' }}</td>
+            <td>{{ apprentice.program_level or '-' }}</td>
+            <td>{{ apprentice.ep_modality or 'Sin definir' }}</td>
+            <td>{{ apprentice.sofia_status or 'Sin estado' }}</td>
+            <td class="actions-cell">
+              {% if has_endpoint('apprentices.detail') %}
+                <a class="icon-action icon-action--view" title="Ver" href="{{ url_for('apprentices.detail', id=apprentice.id) }}">↗</a>
+              {% endif %}
+              {% set can_edit = (_user and _user.role in ['docente', 'super_admin']) or (_user and _user.role == 'aprendiz' and apprentice.student_user_id == _user.id) %}
+              {% if can_edit and has_endpoint('apprentices.edit') %}
+                <a class="icon-action icon-action--edit" title="Editar" href="{{ url_for('apprentices.edit', id=apprentice.id) }}">✎</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="9" class="empty-state">No hay aprendices registrados para mostrar.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

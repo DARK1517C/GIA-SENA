@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Importar fichas - GIA{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Importar fichas</h1>
+    <p>Sube un archivo Excel con la plantilla de referencia para importar fichas y aprendices.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <form method="post" action="{{ url_for('groups.import_groups') }}" enctype="multipart/form-data" class="file-import-form file-import-form--panel">
+    {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+    <input id="groups-import-page-file" class="file-import-input" name="file" type="file" accept=".xlsx,.xls" required>
+    <label class="file-import-picker" for="groups-import-page-file">Seleccionar archivo</label>
+    <span class="file-import-name" data-file-name>Ningun archivo seleccionado</span>
+    <button type="submit" class="primary-btn">Importar</button>
+    <a class="ghost-btn" href="{{ url_for('groups.index') }}">Cancelar</a>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel__header"><h2>Instrucciones</h2></div>
+  <ul>
+    <li>Usa la plantilla de referencia para asegurar columnas y formatos correctos.</li>
+    <li>El proceso importara fichas y aprendices segun las hojas presentes.</li>
+    <li>Despues de importar volveras automaticamente al listado de fichas.</li>
+  </ul>
+</section>
+{% endblock %}

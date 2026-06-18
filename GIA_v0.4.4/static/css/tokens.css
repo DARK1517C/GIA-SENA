@@ -1,0 +1,27 @@
+:root {
+  --font-family: 'Work Sans', sans-serif;
+
+  /* Colores institucionales */
+  --green: #39a900;
+  --darkgreen: #007832;
+  --navy: #00304d;
+  --cyan: #09daf6;
+  --danger: #d13438;
+  --darkdanger: #a32f2f;
+  --muted: #706f6e;
+  --darkmuted: #404040;
+  --text: #222;
+  --surface: #fff;
+  --bg: #f3f3f3;
+  --line: #d2d2d2;
+
+  /* Espaciado (múltiplos de 4px) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+
+  /* Radios y sombras */
+  --radius: 12px;
+  --shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

@@ -1,0 +1,228 @@
+/* === TOPBAR GENERAL === */
+.topbar {
+  position: fixed;              /* siempre visible */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 78px;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  z-index: 1000;                /* por encima del contenido */
+}
+
+/* Ajuste para que el contenido no quede oculto detrás del nav */
+.app-shell {
+  padding-top: 70px;            /* igual a la altura del topbar */
+}
+
+/* Excepción: cuando es login, no aplicar app-shell */
+.login-body .app-shell {
+  all: unset;
+}
+
+/* === LOGO === */
+.brand-logo {
+  height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
+/* === NAVEGACIÓN PRINCIPAL === */
+.main-nav {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.main-nav a {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text);
+  padding: var(--space-sm) 0;
+  position: relative;
+}
+
+/* Línea animada debajo de los enlaces */
+.main-nav a::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--cyan);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.main-nav a:hover::after,
+.main-nav a.active::after {
+  left: 0;
+  width: 100%;
+}
+
+/* === USER MENU === */
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Estructura del details */
+.user-menu details {
+  position: relative;
+}
+
+.user-menu summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.user-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Texto del usuario (nombre y rol) */
+.user-menu__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 0.5; /* más compacto */
+}
+
+.user-menu__text strong {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.user-menu__text small {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* === AVATAR === */
+/* Avatar pequeño en el topbar */
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;                   /* centra contenido */
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--text);              /* color de texto por defecto */
+  overflow: hidden;                /* asegura que el SVG no se desborde */
+}
+
+/* Ajuste del SVG dentro del avatar */
+.avatar svg {
+  width: 22px;                     /* tamaño del ícono dentro del círculo */
+  height: 22px;
+  fill: currentColor;              /* hereda el color definido en .avatar */
+  display: block;
+}
+
+/* Avatar grande dentro del dropdown */
+.user-info .avatar.large {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #d8c6f0;       /* fondo circular */
+  display: flex;                   /* centra contenido */
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;                /* asegura que el SVG no se desborde */
+  color: var(--text);              /* color heredado para el ícono */
+}
+
+/* Ajuste del SVG dentro del avatar grande */
+.user-info .avatar.large svg {
+  width: 20px;                     /* tamaño proporcional dentro de 38px */
+  height: 20px;
+  fill: currentColor;
+  display: block;
+}
+
+/* === DROPDOWN DEL USER MENU === */
+.user-menu__dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  right: 0;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  z-index: 10;
+  padding: 12px;
+  width: auto;              /* se ajusta al contenido */
+  min-width: fit-content;   /* asegura expansión según nombre/rol */
+  max-width: 100%;          /* evita desbordar en pantallas pequeñas */
+}
+
+.user-menu details[open] .user-menu__dropdown {
+  display: flex;
+}
+
+/* Bloque de info del usuario dentro del dropdown */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.user-details strong {
+  display: block;
+  font-size: 12px;
+  white-space: nowrap;
+  line-height: 0.5;   /* más juntos verticalmente */
+  margin-bottom: 0;
+}
+
+.user-details small {
+  color: var(--muted);
+  font-size: 10px;
+  white-space: nowrap;
+  line-height: 0.5;
+  margin-top: 0;
+}
+
+/* Opciones dentro del menú */
+.user-menu__dropdown a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 12px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: 8px;
+}
+
+.user-menu__dropdown a:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transition: background 0.2s ease;
+}
+
+/* Iconos */
+.nav-icon {
+  font-size: 16px;
+}
+
+/* Opción de cerrar sesión */
+.user-menu__dropdown .danger-link {
+  color: var(--danger);
+  font-weight: 500;
+}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Reportes - GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Reportes</h1>
+    <p>Indicadores y exportacion estadistica de aprendices, fichas y evidencias.</p>
+  </div>
+  <div class="hero-actions">
+    <a class="ghost-btn" href="{{ url_for('reports.export_xlsx', **request.args) }}">Excel</a>
+    <a class="ghost-btn" href="{{ url_for('reports.export_pdf', **request.args) }}">PDF</a>
+  </div>
+</section>
+
+<section class="panel">
+  <form class="filters-grid filters-grid--four" method="get">
+    <select name="group_number"><option value="">Ficha</option>{% for value in filter_options.groups %}<option value="{{ value }}" {% if filters.group_number == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    <select name="program_name"><option value="">Programa</option>{% for value in filter_options.programs %}<option value="{{ value }}" {% if filters.program_name == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    <select name="lead_instructor"><option value="">Instructor lider</option>{% for value in filter_options.leaders %}<option value="{{ value }}" {% if filters.lead_instructor == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    <select name="followup_instructor"><option value="">Instructor seguimiento</option>{% for value in filter_options.followups %}<option value="{{ value }}" {% if filters.followup_instructor == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    <select name="municipality"><option value="">Municipio</option>{% for value in filter_options.municipalities %}<option value="{{ value }}" {% if filters.municipality == value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>
+    <select name="status"><option value="">Estado evidencia</option>{% for key, label in status_labels.items() %}<option value="{{ key }}" {% if filters.status == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+    <input type="date" name="date_from" value="{{ filters.date_from }}">
+    <input type="date" name="date_to" value="{{ filters.date_to }}">
+    <button class="primary-btn" type="submit">Actualizar</button>
+  </form>
+</section>
+
+<section class="stats-grid">
+  <article class="stat-card"><h3>Total aprendices</h3><strong>{{ total_apprentices }}</strong></article>
+  <article class="stat-card"><h3>Fichas activas</h3><strong>{{ total_groups }}</strong></article>
+  <article class="stat-card"><h3>Entregadas</h3><strong>{{ stats.delivered }}</strong></article>
+  <article class="stat-card"><h3>No entregadas</h3><strong>{{ stats.not_submitted }}</strong></article>
+  <article class="stat-card"><h3>Pendientes aprobacion</h3><strong>{{ stats.pending }}</strong></article>
+  <article class="stat-card"><h3>Aprobadas</h3><strong>{{ stats.approved }}</strong></article>
+  <article class="stat-card"><h3>Cumplimiento global</h3><strong>{{ stats.global_percent }}%</strong></article>
+</section>
+
+<section class="analytics-grid">
+  <article class="panel metric-panel">
+    <h2>Cumplimiento por ficha</h2>
+    <div class="progress-list">
+      {% for row in group_rows %}
+      <div><span>Ficha {{ row.group_number }}</span><meter min="0" max="100" value="{{ row.percent }}"></meter><strong>{{ row.percent }}%</strong></div>
+      {% endfor %}
+    </div>
+  </article>
+  <article class="panel metric-panel">
+    <h2>Avance por tipo de evidencia</h2>
+    <div class="progress-list">
+      {% for row in type_rows %}
+      <div><span>{{ row.type }}</span><meter min="0" max="100" value="{{ row.percent }}"></meter><strong>{{ row.approved }} / {{ row.total }}</strong></div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="panel">
+  <div class="panel__header"><h2>Detalle filtrado</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Ficha</th><th>Aprendiz</th><th>Evidencia</th><th>Estado</th><th>Observaciones</th></tr></thead>
+      <tbody>
+        {% for item in submissions %}
+        <tr><td>{{ item.apprentice.group_number }}</td><td>{{ item.apprentice.full_name }}</td><td>{{ item.activity.title }}</td><td>{{ item.status_label }}</td><td>{{ item.observations or '' }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

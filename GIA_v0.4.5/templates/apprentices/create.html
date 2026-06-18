@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{% if editing %}Editar aprendiz{% else %}Crear aprendiz{% endif %} - GIA{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>{% if editing %}Editar aprendiz{% else %}Crear aprendiz{% endif %}</h1>
+    <p>{% if editing %}Actualiza la informacion academica y de contacto del aprendiz.{% else %}Registra un aprendiz y vincula su ficha, usuario y etapa productiva.{% endif %}</p>
+  </div>
+</section>
+
+{% set item = apprentice if apprentice is defined else None %}
+{% if editing and item %}
+  {% set form_action = url_for('apprentices.edit', id=item.id) %}
+{% else %}
+  {% set form_action = url_for('apprentices.create') %}
+{% endif %}
+
+<form method="post" action="{{ form_action }}" class="record-form">
+  {% if csrf_token is defined %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% endif %}
+
+  <section class="form-card">
+    <div class="form-card__header">
+      <h2>Datos personales</h2>
+      <p>Identificacion y contacto del aprendiz.</p>
+    </div>
+    <div class="form-two-columns">
+      <label>Tipo de documento
+        <input name="document_type" type="text" value="{{ request.form.document_type or (item.document_type if item else 'CC') }}">
+      </label>
+      <label>Numero de documento
+        <input name="document_number" type="text" value="{{ request.form.document_number or (item.document_number if item else '') }}" required>
+      </label>
+      <label>Nombres
+        <input name="first_names" type="text" value="{{ request.form.first_names or (item.first_names if item else '') }}" required>
+      </label>
+      <label>Apellidos
+        <input name="last_names" type="text" value="{{ request.form.last_names or (item.last_names if item else '') }}" required>
+      </label>
+      <label>Correo electronico
+        <input name="email" type="email" value="{{ request.form.email or (item.email if item else '') }}">
+      </label>
+      <label>Telefono
+        <input name="phone" type="text" value="{{ request.form.phone or (item.phone if item else '') }}">
+      </label>
+      <label>Genero
+        <input name="gender" type="text" value="{{ request.form.gender or (item.gender if item else '') }}">
+      </label>
+      <label>Municipio de origen
+        <input name="municipality_origin" type="text" value="{{ request.form.municipality_origin or (item.municipality_origin if item else '') }}">
+      </label>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-card__header">
+      <h2>Informacion formativa</h2>
+      <p>Ficha, programa e instructores relacionados.</p>
+    </div>
+    <div class="form-two-columns">
+      <label>Numero de ficha
+        <input name="group_number" type="text" value="{{ request.form.group_number or (item.group_number if item else '') }}" required>
+      </label>
+      <label>Programa de formacion
+        <input name="program_name" type="text" value="{{ request.form.program_name or (item.program_name if item else '') }}">
+      </label>
+      <label>Nivel del programa
+        <input name="program_level" type="text" value="{{ request.form.program_level or (item.program_level if item else '') }}">
+      </label>
+      <label>Vigencia de ficha
+        <input name="group_validity" type="text" value="{{ request.form.group_validity or (item.group_validity if item else '') }}">
+      </label>
+      <label>Instructor lider
+        <input name="lead_instructor" type="text" value="{{ request.form.lead_instructor or (item.lead_instructor if item else '') }}">
+      </label>
+      <label>Instructor etapa productiva
+        <input name="followup_instructor" type="text" value="{{ request.form.followup_instructor or (item.followup_instructor if item else '') }}">
+      </label>
+      <label>Correo instructor etapa productiva
+        <input name="followup_instructor_email" type="email" value="{{ request.form.followup_instructor_email or (item.followup_instructor_email if item else '') }}">
+      </label>
+      <label>Estado Sofia Plus
+        <input name="sofia_status" type="text" value="{{ request.form.sofia_status or (item.sofia_status if item else '') }}">
+      </label>
+    </div>
+  </section>
+
+  <section class="form-card">
+    <div class="form-card__header">
+      <h2>Etapa productiva</h2>
+      <p>Modalidad, fechas y entidad coformadora.</p>
+    </div>
+    <div class="form-two-columns">
+      <label>Modalidad EP
+        <select name="ep_modality">
+          <option value="">Selecciona una modalidad</option>
+          {% for val, label in field_select_options.ep_modality %}
+            {% set current = request.form.ep_modality or (item.ep_modality if item else '') %}
+            <option value="{{ val }}" {% if current == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Inicio practica
+        <input name="practice_start_date" type="date" value="{{ request.form.practice_start_date or (item.practice_start_date if item else '') }}">
+      </label>
+      <label>Fin practica
+        <input name="practice_end_date" type="date" value="{{ request.form.practice_end_date or (item.practice_end_date if item else '') }}">
+      </label>
+      <label>Empresa o entidad
+        <input name="company_name" type="text" value="{{ request.form.company_name or (item.company_name if item else '') }}">
+      </label>
+      <label>Municipio empresa
+        <input name="company_municipality" type="text" value="{{ request.form.company_municipality or (item.company_municipality if item else '') }}">
+      </label>
+      <label>Direccion empresa
+        <input name="company_address" type="text" value="{{ request.form.company_address or (item.company_address if item else '') }}">
+      </label>
+      <label>Coformador
+        <input name="coformador_name" type="text" value="{{ request.form.coformador_name or (item.coformador_name if item else '') }}">
+      </label>
+      <label>Correo coformador
+        <input name="coformador_email" type="email" value="{{ request.form.coformador_email or (item.coformador_email if item else '') }}">
+      </label>
+    </div>
+  </section>
+
+  <div class="form-actions record-form__actions">
+    <button type="submit" class="primary-btn">{% if editing %}Guardar cambios{% else %}Crear aprendiz{% endif %}</button>
+    <a class="ghost-btn" href="{{ url_for('apprentices.index') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

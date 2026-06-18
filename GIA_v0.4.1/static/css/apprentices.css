@@ -1,0 +1,449 @@
+/* ===========================
+   PANEL DE FILTROS Y BÚSQUEDA
+   =========================== */
+.filter-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.panel__header--left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-icon {
+  font-size: 1.2rem;
+  color: var(--navy);
+}
+
+/* Contenedor de filtros estilo Fluent 2 */
+.filters-grid--four {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+/* Inputs y combobox uniformes */
+.filters-grid--four input,
+.filters-grid--four select,
+.filters-grid--four .combobox input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #d2d2d2;
+  border-radius: var(--space-xs);
+  padding: 0 12px;
+  font-size: 0.95rem;
+  color: #222;
+  background-color: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+/* Hover y focus estilo Fluent */
+.filters-grid--four input:hover,
+.filters-grid--four select:hover,
+.filters-grid--four .combobox input:hover,
+.filters-grid--four input:focus,
+.filters-grid--four select:focus,
+.filters-grid--four .combobox input:focus {
+  border-color: var(--darkgreen);
+  outline: none;
+}
+
+/* Searchbox con icono */
+.filters-grid--four input[name="search"] {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+/* Select con flecha Fluent 2 */
+.filters-grid--four select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"), var(--line);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+/* Opciones internas */
+.filters-grid--four select option {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+/* Combobox personalizado */
+.combobox {
+  position: relative;
+}
+
+.combobox-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #d2d2d2;
+  border-radius: var(--space-sm);
+  background: #fff;
+  z-index: 10;
+  display: none;
+}
+
+.combobox-list.active {
+  display: block;
+}
+
+.combobox-list option {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.combobox-list option:hover {
+  background: #f0f0f0;
+}
+
+/* Barra inferior */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.toolbar__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.link-action {
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--navy);
+  cursor: pointer;
+}
+
+.link-action--green {
+  color: var(--green);
+}
+
+/* ===========================
+   TABLA DE APRENDICES
+   =========================== */
+.table-card {
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+/* Encabezado */
+.data-table thead {
+  background: #e6f5ff;
+}
+
+.data-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 10px 20px;
+}
+
+/* Celdas */
+.data-table td {
+  padding: 10px 20px;
+  font-size: 12px;
+}
+
+/* Filas alternadas estilo Microsoft */
+.data-table tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+.data-table tbody tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* Hover */
+.data-table tbody tr:hover {
+   background: rgba(57, 169, 0, 0.08);
+  transition: background 0.2s ease;
+}
+
+/* Acciones */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-action {
+  font-size: 1rem;
+  margin: 0 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  background: none;
+  border: none;
+}
+
+.icon-action:hover {
+  transform: scale(1.1);
+}
+
+.icon-action--view {
+  color: var(--navy);
+}
+
+.icon-action--edit {
+  color: var(--green);
+}
+
+.icon-action--delete {
+  color: var(--danger);
+}
+
+/* Estado vacío */
+.empty-state {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+}
+
+.record-form {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.form-card {
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.form-card__header {
+  margin-bottom: 18px;
+}
+
+.form-card__header h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.form-card__header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.form-two-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.form-two-columns label {
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.form-two-columns input,
+.form-two-columns select,
+.form-two-columns textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #d2d2d2;
+  border-radius: var(--space-xs);
+  padding: 0 12px;
+  color: var(--text);
+  background: #fff;
+  font-weight: 400;
+}
+
+.form-two-columns textarea {
+  padding-top: 10px;
+}
+
+.record-form__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+@media (max-width: 760px) {
+  .form-two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .record-form__actions,
+  .page-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .evidence-item {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-panel .filters-grid,
+.admin-panel .filters-grid--five {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-panel input,
+.admin-panel select,
+.admin-panel textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #d2d2d2;
+  border-radius: var(--space-xs);
+  padding: 0 12px;
+  background: #fff;
+}
+
+.admin-table td,
+.admin-table th {
+  vertical-align: middle;
+}
+
+.evidence-filter-panel {
+  margin-bottom: 18px;
+}
+
+.evidence-stat-card {
+  min-height: 132px;
+}
+
+.evidence-list {
+  display: grid;
+  gap: 12px;
+}
+
+.evidence-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.evidence-item strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.evidence-item p {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.evidence-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.evidence-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--status-color) 18%, white);
+  color: #1f1f1f;
+  font-weight: 700;
+}
+
+.evidence-status::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-color);
+}
+
+.evidence-status--large {
+  align-self: center;
+  font-size: 0.95rem;
+}
+
+.pdf-preview {
+  width: 100%;
+  min-height: 620px;
+  border: 1px solid var(--border-color, #d8dee4);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.evidence-preview-card {
+  min-height: 720px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color, #d8dee4);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-wrap th {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  color: #555;
+}

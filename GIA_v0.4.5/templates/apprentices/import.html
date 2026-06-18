@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Importar aprendices - GIA{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Importar aprendices</h1>
+    <p>Sube el archivo Excel de referencia para cargar aprendices, fichas y usuarios Aprendiz.</p>
+  </div>
+</section>
+
+<section class="panel">
+  <form method="post" action="{{ url_for('apprentices.import_excel') }}" enctype="multipart/form-data" class="file-import-form file-import-form--panel">
+    {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+    <input id="apprentices-import-page-file" class="file-import-input" name="file" type="file" accept=".xlsx,.xls" required>
+    <label class="file-import-picker" for="apprentices-import-page-file">Seleccionar archivo</label>
+    <span class="file-import-name" data-file-name>Ningun archivo seleccionado</span>
+    <button type="submit" class="primary-btn">Importar</button>
+    <a class="ghost-btn" href="{{ url_for('apprentices.index') }}">Cancelar</a>
+  </form>
+</section>
+
+<section class="panel">
+  <div class="panel__header"><h2>Instrucciones</h2></div>
+  <ul>
+    <li>Usa un archivo Excel con columnas de aprendices y, si aplica, datos de ficha.</li>
+    <li>Al importar se crean o actualizan aprendices, fichas, usuarios Aprendiz y evidencias asignadas.</li>
+    <li>Despues de importar volveras automaticamente al listado de aprendices.</li>
+  </ul>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+(function(){
+  document.querySelectorAll(".file-import-form").forEach(function(form){
+    var input = form.querySelector(".file-import-input");
+    var label = form.querySelector("[data-file-name]");
+    if (!input || !label) return;
+    input.addEventListener("change", function(){
+      label.textContent = input.files && input.files.length ? input.files[0].name : "Ningun archivo seleccionado";
+    });
+  });
+})();
+</script>
+{% endblock %}
