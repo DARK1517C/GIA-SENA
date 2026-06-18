@@ -1,0 +1,298 @@
+{# templates/apprentices/detail.html #}
+
+{% extends "base.html" %}
+
+{% block title %}{{ page_title or 'Detalle' }} | GIA{% endblock %}
+
+{% block content %}
+
+{# Back link #}
+{% if back_url is defined and back_url %}
+  <a class="back-link" href="{{ back_url }}">‹ Volver a la lista de aprendices</a>
+{% endif %}
+
+{# Normalizar variable: aceptar tanto `rec` (versiones antiguas) como `record` #}
+{% if rec is defined and rec %}
+  {% set record = rec %}
+{% else %}
+  {% set record = record if record is defined else None %}
+{% endif %}
+
+{# Safe permissions #}
+{% set _can_edit = (_user and _user.role in ['docente', 'super_admin']) or (_user and _user.role == 'aprendiz' and record and record.student_user_id == _user.id) %}
+
+{# Apprentice detail view #}
+{% if detail_type == 'apprentice' %}
+<section class="hero-card">
+  <div>
+    <h1>
+      {% if record %}
+        {{ record.full_name if record.full_name is defined else (record.first_names ~ ' ' ~ record.last_names) }}
+      {% else %}
+        Aprendiz
+      {% endif %}
+    </h1>
+    <p>Información del aprendiz</p>
+  </div>
+
+  <div class="hero-actions">
+    {% if _can_edit and has_endpoint('apprentices.edit') and record %}
+  <a class="icon-btn icon-btn--edit" href="{{ url_for('apprentices.edit', id=record.id) }}" aria-label="Editar aprendiz" title="Editar aprendiz">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <path d="M21.03 2.97a3.578 3.578 0 0 1 0 5.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L15.97 2.97a3.578 3.578 0 0 1 5.06 0ZM15 6.06 5.062 16a.75.75 0 0 0-.193.333l-1.05 3.85 3.85-1.05A.75.75 0 0 0 8 18.938L17.94 9 15 6.06Zm2.03-2.03-.97.97L19 7.94l.97-.97a2.079 2.079 0 0 0-2.94-2.94Z" fill="currentColor"/>
+  </svg>
+</a>
+{% elif edit_url is defined and edit_url %}
+  <a class="primary-btn" href="{{ edit_url }}">Editar</a>
+{% endif %}
+
+    {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('apprentices.delete') and record %}
+  <form method="post" action="{{ url_for('apprentices.delete', id=record.id) }}" onsubmit="return confirm('Eliminar este aprendiz?');" style="display:inline">
+    {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+    <button type="submit" class="icon-btn icon-btn--danger" aria-label="Eliminar aprendiz" title="Eliminar aprendiz">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M12 1.75a3.25 3.25 0 0 1 3.245 3.066L15.25 5h5.25a.75.75 0 0 1 .102 1.493L20.5 6.5h-.796l-1.28 13.02a2.75 2.75 0 0 1-2.561 2.474l-.176.006H8.313a2.75 2.75 0 0 1-2.714-2.307l-.023-.174L4.295 6.5H3.5a.75.75 0 0 1-.743-.648L2.75 5.75a.75.75 0 0 1 .648-.743L3.5 5h5.25A3.25 3.25 0 0 1 12 1.75Zm6.197 4.75H5.802l1.267 12.872a1.25 1.25 0 0 0 1.117 1.122l.127.006h7.374c.6 0 1.109-.425 1.225-1.002l.02-.126L18.196 6.5ZM13.75 9.25a.75.75 0 0 1 .743.648L14.5 10v7a.75.75 0 0 1-1.493.102L13 17v-7a.75.75 0 0 1 .75-.75Zm-3.5 0a.75.75 0 0 1 .743.648L11 10v7a.75.75 0 0 1-1.493.102L9.5 17v-7a.75.75 0 0 1 .75-.75Zm1.75-6a1.75 1.75 0 0 0-1.744 1.606L10.25 5h3.5A1.75 1.75 0 0 0 12 3.25Z" fill="currentColor"/>
+      </svg>
+    </button>
+  </form>
+{% endif %}
+  </div>
+</section>
+
+{# Layout with two columns like previous versions #}
+<section class="detail-layout">
+
+  <div class="detail-column">
+    <article class="info-card">
+      <h2>
+    <span class="info-card__icon" aria-hidden="true">
+      <!-- Icono inline (usa currentColor para heredar color) -->
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 1.999c5.524 0 10.002 4.478 10.002 10.002 0 5.523-4.478 10.001-10.002 10.001-5.524 0-10.002-4.478-10.002-10.001C1.998 6.477 6.476 1.999 12 1.999Zm0 1.5a8.502 8.502 0 1 0 0 17.003A8.502 8.502 0 0 0 12 3.5Zm-.004 7a.75.75 0 0 1 .744.648l.007.102.003 5.502a.75.75 0 0 1-1.493.102l-.007-.101-.003-5.502a.75.75 0 0 1 .75-.75ZM12 7.003a.999.999 0 1 1 0 1.997.999.999 0 0 1 0-1.997Z" fill="#212121"/>
+      </svg>
+    </span>
+    Información personal
+  </h2>
+      <dl>
+        <dt>Tipo y número de documento</dt>
+        <dd>{{ record.document_type or '—' }} {{ record.document_number or '—' }}</dd>
+
+        <dt>Género</dt>
+        <dd>{{ record.gender or 'Sin dato' }}</dd>
+
+        <dt>Correo electrónico</dt>
+        <dd>{{ record.email or 'Sin dato' }}</dd>
+
+        <dt>Teléfono</dt>
+        <dd>{{ record.phone or 'Sin dato' }}</dd>
+
+        <dt>Municipio de origen</dt>
+        <dd>{{ record.municipality_origin or 'Sin dato' }}</dd>
+      </dl>
+    </article>
+
+    <article class="info-card">
+      <h2>
+    <span class="info-card__icon" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <title>Maletín</title>
+        <path d="M8.75 3h6.5a.75.75 0 0 1 .743.648L16 3.75V7h1.75A3.25 3.25 0 0 1 21 10.25v6.5A3.25 3.25 0 0 1 17.75 20H6.25A3.25 3.25 0 0 1 3 16.75v-6.5A3.25 3.25 0 0 1 6.25 7H8V3.75a.75.75 0 0 1 .648-.743L8.75 3h6.5-6.5Zm9 5.5H6.25a1.75 1.75 0 0 0-1.75 1.75v6.5c0 .966.784 1.75 1.75 1.75h11.5a1.75 1.75 0 0 0 1.75-1.75v-6.5a1.75 1.75 0 0 0-1.75-1.75Zm-3.25-4h-5V7h5V4.5Z" fill="currentColor"/>
+      </svg>
+    </span>
+    Etapa Productiva
+  </h2>
+      <dl>
+        <dt>Modalidad de etapa productiva</dt>
+        <dd>{{ record.ep_modality or 'Sin dato' }}</dd>
+
+        <dt>Inicio de etapa productiva</dt>
+        <dd>{{ record.practice_start_date or 'Sin dato' }}</dd>
+
+        <dt>Fin de etapa productiva</dt>
+        <dd>{{ record.practice_end_date or 'Sin dato' }}</dd>
+
+        <dt>Momento 1: planeacion de la etapa productiva</dt>
+        <dd>{{ record.followup_moment1_start or 'Sin dato' }}{% if record.followup_moment1_start or record.followup_moment1_end %} al {{ record.followup_moment1_end or 'Sin dato' }}{% endif %}</dd>
+
+        <dt>Momento 2: seguimiento de la etapa productiva</dt>
+        <dd>{{ record.followup_moment2_start or 'Sin dato' }}{% if record.followup_moment2_start or record.followup_moment2_end %} al {{ record.followup_moment2_end or 'Sin dato' }}{% endif %}</dd>
+
+        <dt>Momento 3: evaluacion de la etapa productiva</dt>
+        <dd>{{ record.followup_moment3_start or 'Sin dato' }}{% if record.followup_moment3_start or record.followup_moment3_end %} al {{ record.followup_moment3_end or 'Sin dato' }}{% endif %}</dd>
+
+        <dt>Momento 4: adicional (opcional)</dt>
+        <dd>{{ record.followup_moment4_start or 'Sin dato' }}{% if record.followup_moment4_start or record.followup_moment4_end %} al {{ record.followup_moment4_end or 'Sin dato' }}{% endif %}</dd>
+
+        <dt>Fecha juicio evaluativo</dt>
+        <dd>{{ record.evaluation_date or 'Sin dato' }}</dd>
+
+        <dt>Gestión individual del aprendiz</dt>
+        <dd>{{ record.individual_management or 'Sin dato' }}</dd>
+
+        <dt>Responsable ARL</dt>
+        <dd>{{ record.arl_responsible or 'Sin dato' }}</dd>
+      </dl>
+    </article>
+  </div>
+
+  <div class="detail-column">
+    <article class="info-card">
+      <h2>
+    <span class="info-card__icon" aria-hidden="true">
+      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M7 6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6Zm1.5 1.5h7v-1h-7v1Z" fill="#212121"/>
+  <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H18a2.5 2.5 0 0 1 2.5 2.5v14.25a.75.75 0 0 1-.75.75H5.5a1 1 0 0 0 1 1h13.25a.75.75 0 0 1 0 1.5H6.5A2.5 2.5 0 0 1 4 19.5v-15ZM5.5 18H19V4.5a1 1 0 0 0-1-1H6.5a1 1 0 0 0-1 1V18Z" fill="#212121"/>
+</svg>
+
+
+    </span>
+    Información formativa
+  </h2>
+      <dl>
+        <dt>Numero de grupo</dt>
+        <dd>
+          {% if record.group %}
+            <a href="{{ url_for('groups.detail', id=record.group.id) }}">{{ record.group.group_number }}</a>
+          {% else %}
+            {{ record.group_number or 'Sin dato' }}
+          {% endif %}
+        </dd>
+
+        <dt>Programa de formación</dt>
+        <dd>{{ record.program_name or 'Sin dato' }}</dd>
+
+        <dt>Nivel del Programa</dt>
+        <dd>{{ record.program_level or 'Sin dato' }}</dd>
+
+        <dt>Vigencia del grupo</dt>
+        <dd>{{ record.group_validity or 'Sin dato' }}</dd>
+
+        <dt>Instructor líder de formación</dt>
+        <dd>{{ record.lead_instructor or 'Sin instructor' }}</dd>
+
+        <dt>Instructor de etapa productiva</dt>
+        <dd>{{ record.followup_instructor or 'Sin instructor' }}</dd>
+
+        <dt>Correo de instructor de etapa productiva</dt>
+        <dd>{{ record.followup_instructor_email or 'Sin correo' }}</dd>
+        <dt>Estado</dt>
+        <dd>{{ record.sofia_status or 'Sin estado' }}</dd>
+      </dl>
+    </article>
+
+    <article class="info-card">
+      <h2>
+    <span class="info-card__icon" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <title>Entidad coformadora</title>
+        <path d="M8.5 5.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7.5 13.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0ZM8.5 9a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM11 6.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0ZM12 12.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM14.5 13.5a1 1 0 1 1 2 0 1 1 0 0 1-2 0ZM12 9a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z" fill="currentColor"/>
+        <path d="M6.25 2A2.25 2.25 0 0 0 4 4.25v16.5c0 .414.336.75.75.75h14.503a.75.75 0 0 0 .75-.75v-9a2.25 2.25 0 0 0-2.25-2.25H16.5V4.25A2.25 2.25 0 0 0 14.25 2h-8ZM5.5 4.25a.75.75 0 0 1 .75-.75h8a.75.75 0 0 1 .75.75v6c0 .414.336.75.75.75h2.003a.75.75 0 0 1 .75.75V20H16.5v-2.75a.75.75 0 0 0-.75-.75h-7.5a.75.75 0 0 0-.75.75V20h-2V4.25ZM15 18v2h-2.25v-2H15Zm-3.75 0v2H9v-2h2.25Z" fill="currentColor"/>
+      </svg>
+    </span>
+    Entidad coformadora
+  </h2>
+      <dl>
+        <dt>Nombre de entidad coformadora</dt>
+        <dd>{{ record.company_name or 'Sin dato' }}</dd>
+
+        <dt>Dirección</dt>
+        <dd>{{ record.company_address or 'Sin dato' }}</dd>
+
+        <dt>Municipio</dt>
+        <dd>{{ record.company_municipality or 'Sin dato' }}</dd>
+
+        <dt>Coformador</dt>
+        <dd>{{ record.coformador_name or 'Sin dato' }}</dd>
+
+        <dt>Correo coformador</dt>
+        <dd>{{ record.coformador_email or 'Sin dato' }}</dd>
+
+        <dt>Teléfono coformador</dt>
+        <dd>{{ record.coformador_phone or 'Sin dato' }}</dd>
+      </dl>
+    </article>
+  </div>
+  
+</section>
+<article class="info-card-apprendice-evidence">
+  <h2><svg width="24" height="24" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="M7 12.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Zm.75 2.25a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM7 18.25a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Zm3.75-6.75a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5ZM10 15.25a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1-.75-.75Zm.75 2.25a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5Zm8.664-9.086-5.829-5.828a.493.493 0 0 0-.049-.04.626.626 0 0 1-.036-.03 2.072 2.072 0 0 0-.219-.18.652.652 0 0 0-.08-.044l-.048-.024-.05-.029c-.054-.031-.109-.063-.166-.087a1.977 1.977 0 0 0-.624-.138c-.02-.001-.04-.004-.059-.007A.605.605 0 0 0 12.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9.828a2 2 0 0 0-.586-1.414ZM18.5 20a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 .5-.5h6V8a2 2 0 0 0 2 2h4.5v10Zm-5-15.379L17.378 8.5H14a.5.5 0 0 1-.5-.5V4.621Z" fill="#212121"/>
+</svg>Evidencias del aprendiz</h2>
+</article>
+  <section class="stats-grid">
+    {% for type, item in evidence_summary.items() %}
+    <article class="stat-card">
+      <span class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-label="Certificate">
+          <path d="M18 10a4 4 0 0 1 3 6.648v4.6a.75.75 0 0 1-1.09.67l-.09-.055L18 20.591l-1.82 1.272a.75.75 0 0 1-1.172-.51l-.007-.105v-4.602A4 4 0 0 1 18 10Zm1.5 7.71a3.99 3.99 0 0 1-1.5.291 3.99 3.99 0 0 1-1.5-.291v2.099l1.071-.747a.75.75 0 0 1 .759-.06l.1.06 1.07.747V17.71Zm-.25-14.706a2.75 2.75 0 0 1 2.745 2.582l.005.168.001 5.246a5.027 5.027 0 0 0-1.5-1.331L20.5 5.754a1.25 1.25 0 0 0-1.122-1.244l-.128-.006H4.75a1.25 1.25 0 0 0-1.244 1.122l-.006.128v9.5c0 .647.492 1.18 1.122 1.243l.128.007 8.922.001.123.203.134.196.071.094-.001 1.006H4.75a2.75 2.75 0 0 1-2.745-2.583L2 15.254v-9.5a2.75 2.75 0 0 1 2.582-2.745l.168-.005h14.5ZM18 11.5a2.5 2.5 0 1 0 0 5.001 2.5 2.5 0 0 0 0-5.001Zm-6.75 1a.75.75 0 0 1 .102 1.493L11.25 14h-4.5a.75.75 0 0 1-.102-1.493l.102-.007h4.5Zm6-5.5a.75.75 0 0 1 .102 1.493l-.102.007H6.75a.75.75 0 0 1-.102-1.493L6.75 7h10.5Z"/>
+        </svg>
+      </span>
+      <h3>{{ type }}</h3>
+      <strong>{{ item.approved }} de {{ item.total }}</strong>
+      <small>Aprobadas</small>
+    </article>
+    {% endfor %}
+  </section>
+
+  {# Evidencias agrupadas por submission.activity.evidence_type #}
+<section class="evidence-overview" aria-label="Evidencias del aprendiz">
+  <div class="evidence-grid">
+    {% if evidence_groups %}
+      {% for etype, info in evidence_groups.items() %}
+        <article class="evidence-card" data-etype="{{ etype|e }}">
+          <header class="evidence-card__head" role="button" tabindex="0" aria-expanded="false">
+            <div class="evidence-card__title">
+              <strong>{{ etype }}</strong>
+              <small class="muted">({{ info.total_files }} archivos)</small>
+            </div>
+            <div class="evidence-card__meta">
+              <span class="badge badge--approved">{{ info.approved }} aprobados</span>
+              <span class="badge badge--pending">{{ info.pending }} pendientes</span>
+              <span class="chev">▾</span>
+            </div>
+          </header>
+
+          <div class="evidence-card__body" hidden>
+            {% for submission in info.submissions %}
+              <div class="submission-block">
+                <div class="submission-header">
+                  <div>
+                    <strong>{{ submission.activity.title or submission.activity.name or 'Actividad' }}</strong>
+                    <div class="muted small">Enviado: {{ submission.submitted_at or '-' }}</div>
+                  </div>
+                  <div class="submission-count">
+                    <small class="muted">{{ submission.evidences|length }} archivo(s)</small>
+                    <a class="ghost-btn" href="{{ url_for('evidences.detail', submission_id=submission.id) }}">Ver envío</a>
+                  </div>
+                </div>
+
+                <ul class="submission-evidence-list">
+                  {% for ev in submission.evidences %}
+                    <li class="evidence-item">
+                      <a href="{{ ev.url or url_for('evidences.download', id=ev.id) }}" target="_blank" rel="noopener">
+                        <span class="evidence-name">{{ ev.filename or 'Archivo' }}</span>
+                      </a>
+                      <div class="evidence-right">
+                        <span class="status {% if ev.status|lower == 'aprobado' %}status--approved{% elif ev.status|lower == 'pendiente' %}status--pending{% else %}status--missing{% endif %}">
+                          {{ ev.status or 'Sin estado' }}
+                        </span>
+                        <small class="muted">{{ ev.submitted_at or '' }}</small>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endfor %}
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <p class="empty-state">No hay evidencias asociadas.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Grupos | GIA{% endblock %}
+
+{% block content %}
+
+<section class="page-head page-head--split">
+
+  <div><h1>Grupos</h1></div>
+
+  <div class="page-actions">
+
+    {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('groups.create') %}
+      <a class="primary-btn" href="{{ url_for('groups.create') }}">+ Añadir grupo</a>
+    {% endif %}
+  </div>
+
+</section>
+
+<div id="groups-management" class="management-list">
+
+  <section class="panel filter-panel">
+    <div class="panel__header panel__header--left">
+      <span class="filter-icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.5 16a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h3Zm3-5a.75.75 0 0 1 0 1.5h-9a.75.75 0 0 1 0-1.5h9Zm3-5a.75.75 0 0 1 0 1.5h-15a.75.75 0 0 1 0-1.5h15Z" fill="#212121"/>
+        </svg>
+      </span>
+      <h2>Filtros y búsqueda</h2>
+    </div>
+
+    <form class="filters-grid filters-grid--four" method="get" action="{{ url_for('groups.index') }}">
+    <input type="text" name="search" placeholder="Búsqueda" value="{{ request.args.get('search', '') }}">
+
+    {# Municipio: select con opciones predefinidas #}
+    <select name="municipality">
+      <option value="">Por municipio</option>
+      {% for m in municipalities %}
+        <option value="{{ m }}" {% if request.args.get('municipality') == m %}selected{% endif %}>{{ m }}</option>
+      {% endfor %}
+    </select>
+
+    {# Program level (reemplaza modality) #}
+    <select name="program_level">
+      <option value="">Por nivel de formación</option>
+      {% for lvl in program_levels %}
+        <option value="{{ lvl }}" {% if request.args.get('program_level') == lvl %}selected{% endif %}>{{ lvl }}</option>
+      {% endfor %}
+    </select>
+
+    {# Sofia group status (reemplaza quick_search) #}
+    <select name="sofia_group_status">
+      <option value="">Por estado del grupo</option>
+      {% for st in sofia_statuses %}
+        <option value="{{ st }}" {% if request.args.get('sofia_group_status') == st %}selected{% endif %}>{{ st }}</option>
+      {% endfor %}
+    </select>
+
+    <button type="submit" class="primary-btn">Filtrar</button>
+    <a class="ghost-btn" href="{{ url_for('groups.index') }}">Limpiar</a>
+  </form>
+    <div class="toolbar">
+      <span>Mostrando {{ cards|length }} de {{ total_groups|default(cards|length) }} grupos</span>
+      <div class="toolbar__actions">
+        {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('groups.import_groups') %}
+          <form method="post" action="{{ url_for('groups.import_groups') }}" enctype="multipart/form-data" class="file-import-form">
+            {% if csrf_token is defined %}
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
+            <input id="groups-import-file" class="file-import-input" type="file" name="file" accept=".xlsx,.xls" required>
+            <label class="file-import-picker" for="groups-import-file">Seleccionar archivo</label>
+            <span class="file-import-name" data-file-name>Ningun archivo seleccionado</span>
+            <button type="submit" class="link-action link-action--green">↑ Importar datos</button>
+          </form>
+        {% endif %}
+
+        {% if has_endpoint('groups.export_groups') %}
+          <a class="link-action" href="{{ url_for('groups.export_groups', **request.args) }}">↓ Exportar datos</a>
+        {% endif %}
+      </div>
+    </div>
+
+  </section>
+
+  {% if _user and _user.role == 'super_admin' and has_endpoint('groups.bulk_delete') %}
+    <form id="bulk-groups-form" method="post" action="{{ url_for('groups.bulk_delete') }}" data-bulk-form class="bulk-selection">
+      {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
+      <div class="bulk-bar bulk-bar--top">
+        <label class="select-all-pill">
+          <input type="checkbox" data-select-all>
+          <span data-select-count>Seleccionar todo</span>
+        </label>
+        <div class="toolbar__actions">
+          <button type="button" class="ghost-btn" data-disable-bulk="groups-management">Cancelar</button>
+          <button type="submit" class="danger-btn" onclick="return confirm('Eliminar las fichas seleccionadas? Los aprendices asociados se conservaran y quedaran desasociados.');">Eliminar seleccionados</button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
+
+  <section class="groups-grid">
+
+    {% if cards %}
+      {% for card in cards %}
+        {% set group = card.group %}
+        {% set row = card.row %}
+        {# normalizamos antes de comparar #}
+        {% set level_raw = (row.program_level or group.program_level or '')|lower|normalize %}
+        {% if 'tecnolog' in level_raw %}
+          {% set level_class = 'group-card--tecnologo' %}
+        {% elif 'tecnic' in level_raw %}
+          {% set level_class = 'group-card--tecnico' %}
+        {% elif 'oper' in level_raw %}
+          {% set level_class = 'group-card--operario' %}
+        {% else %}
+          {% set level_class = '' %}
+        {% endif %}
+
+        <article class="group-card {{ level_class }} clickable-card" data-href="{{ url_for('groups.detail', id=group.id) }}" tabindex="0" role="link" aria-label="Abrir detalle del grupo {{ row.group_number or group.group_number }}">
+          <div class="group-card__banner">
+            {% if _user and _user.role == 'super_admin' %}
+              <input class="group-card__check bulk-only" type="checkbox" name="selected_ids" value="{{ group.id }}" form="bulk-groups-form" data-select-item aria-label="Seleccionar grupo {{ group.group_number }}">
+            {% endif %}
+            <div>
+              <h3 class="group-card__title">Grupo {{ row.group_number or group.group_number }}</h3>
+              <p class="meta">{{ row.program_name or group.program_name or 'Programa sin nombre' }}</p>
+            </div>
+          </div>
+
+          <div class="group-card__body">
+            <div><span class="label">Nivel del Programa</span> <strong>{{ row.program_level or group.program_level or 'Sin dato' }}</strong></div>
+            <div><span class="label">Municipio</span> <strong>{{ row.municipality or group.municipality or 'Sin dato' }}</strong></div>
+            <div><span class="label">Modalidad</span> <strong>{{ row.modality or group.modality or 'Sin dato' }}</strong></div>
+            <div><span class="label">Instructor de formación</span> <strong>{{ row.lead_instructor or group.lead_instructor or 'Sin instructor' }}</strong></div>
+            <div><span class="label">Instructor de EP</span> <strong>{{ row.followup_instructor or group.followup_instructor or 'Sin instructor' }}</strong></div>
+            <div><span class="label">Inicio de formación</span> <strong>{{ row.group_start_date or group.group_start_date or '-' }}</strong></div>
+            <div><span class="label">Inicio de EP</span> <strong>{{ row.ep_start_date or group.ep_start_date or '—' }}</strong></div>
+            <div><span class="label">Fin de formación</span> <strong>{{ row.training_end_date or group.training_end_date or '-' }}</strong></div>
+            <div><span class="label">Estado</span> <strong>{{ row.sofia_group_status or group.sofia_group_status or '-' }}</strong></div>
+
+            <div class="group-card__actions">
+              {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('groups.edit') %}
+                <a class="icon-action icon-action--edit" title="Editar" href="{{ url_for('groups.edit', id=group.id) }}">
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M21.03 2.97a3.578 3.578 0 0 1 0 5.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L15.97 2.97a3.578 3.578 0 0 1 5.06 0ZM15 6.06 5.062 16a.75.75 0 0 0-.193.333l-1.05 3.85 3.85-1.05A.75.75 0 0 0 8 18.938L17.94 9 15 6.06Zm2.03-2.03-.97.97L19 7.94l.97-.97a2.079 2.079 0 0 0-2.94-2.94Z" fill="currentColor"/>
+                  </svg>
+                </a>
+              {% endif %}
+
+              {% if _user and _user.role in ['docente', 'super_admin'] and has_endpoint('groups.delete') %}
+                <form method="post" action="{{ url_for('groups.delete', id=group.id) }}" onsubmit="return confirm('Eliminar esta ficha? Los aprendices asociados se conservaran y quedaran desasociados.');" style="display:inline">
+                  {% if csrf_token is defined %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  {% endif %}
+                  <button type="submit" class="icon-action icon-action--delete" aria-label="Eliminar grupo" title="Eliminar grupo">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                      <path d="M12 1.75a3.25 3.25 0 0 1 3.245 3.066L15.25 5h5.25a.75.75 0 0 1 .102 1.493L20.5 6.5h-.796l-1.28 13.02a2.75 2.75 0 0 1-2.561 2.474l-.176.006H8.313a2.75 2.75 0 0 1-2.714-2.307l-.023-.174L4.295 6.5H3.5a.75.75 0 0 1-.743-.648L2.75 5.75a.75.75 0 0 1 .648-.743L3.5 5h5.25A3.25 3.25 0 0 1 12 1.75Zm6.197 4.75H5.802l1.267 12.872a1.25 1.25 0 0 0 1.117 1.122l.127.006h7.374c.6 0 1.109-.425 1.225-1.002l.02-.126L18.196 6.5ZM13.75 9.25a.75.75 0 0 1 .743.648L14.5 10v7a.75.75 0 0 1-1.493.102L13 17v-7a.75.75 0 0 1 .75-.75Zm-3.5 0a.75.75 0 0 1 .743.648L11 10v7a.75.75 0 0 1-1.493.102L9.5 17v-7a.75.75 0 0 1 .75-.75Zm1.75-6a1.75 1.75 0 0 0-1.744 1.606L10.25 5h3.5A1.75 1.75 0 0 0 12 3.25Z" fill="currentColor"/>
+                    </svg>
+                  </button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+
+      {% endfor %}
+    {% else %}
+      <div class="panel"><p class="empty-state">No hay grupos registrados para mostrar.</p></div>
+    {% endif %}
+
+  </section>
+
+</div>
+
+{# JavaScript: hace clicable la tarjeta, pero respeta enlaces, botones y formularios dentro de la tarjeta #}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const cards = document.querySelectorAll('article.group-card.clickable-card[data-href]');
+  cards.forEach(function (card) {
+    // Click con ratón
+    card.addEventListener('click', function (ev) {
+      // Si el click vino desde un enlace, botón, form, input, textarea o select, no navegamos
+      if (ev.target.closest('a, button, form, input, textarea, select')) return;
+      const href = card.dataset.href;
+      if (!href) return;
+      window.location.href = href;
+    });
+
+    // Soporte teclado: Enter o Space activan la navegación
+    card.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        // Si el foco está en un control interactivo, no navegamos
+        if (document.activeElement && document.activeElement.closest && document.activeElement.closest('a, button, input, textarea, select, form')) {
+          return;
+        }
+        const href = card.dataset.href;
+        if (href) window.location.href = href;
+      }
+    });
+  });
+});
+</script>
+
+{# Pequeños estilos de ayuda (si no están en tu CSS global) #}
+<style>
+/* Indicar que la tarjeta es interactiva */
+.group-card.clickable-card { cursor: pointer; }
+.group-card.clickable-card:focus { outline: none; box-shadow: 0 0 0 4px rgba(11,143,71,0.04); }
+</style>
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ submission.activity.title }} | GIA{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('evidences.index') }}">‹ Volver a evidencias</a>
+
+<section class="hero-card">
+  <div>
+    <h1>{{ submission.activity.title }}</h1>
+    <p>{{ submission.apprentice.full_name }} - Ficha {{ submission.apprentice.group_number }}</p>
+  </div>
+  <span class="evidence-status evidence-status--large" style="--status-color: {{ submission.status_color }}">{{ submission.status_label }}</span>
+</section>
+
+<section class="detail-layout">
+  <div class="detail-column">
+    <article class="info-card">
+      <h2>Entrega</h2>
+      <dl>
+        <dt>Tipo</dt>
+        <dd>{{ submission.activity.evidence_type }}</dd>
+        <dt>Descripcion</dt>
+        <dd>{{ submission.activity.description or 'Sin descripcion' }}</dd>
+        <dt>Rango de entrega</dt>
+        <dd>Entre {{ submission.activity.due_start or 'sin fecha inicial' }} y {{ submission.activity.due_end or 'sin fecha final' }}</dd>
+        <dt>Archivo</dt>
+        <dd>{{ submission.file_name or 'Sin archivo cargado' }}</dd>
+      </dl>
+    </article>
+
+    {% if current_user.role in ['aprendiz', 'docente', 'super_admin'] and submission.status != 'aprobado' %}
+    <article class="info-card">
+      <h2>Subir evidencia</h2>
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('evidences.upload', submission_id=submission.id) }}" class="filters-grid">
+        <input type="file" name="file" required>
+        <button class="primary-btn" type="submit">Enviar evidencia</button>
+      </form>
+    </article>
+    {% endif %}
+
+    {% if current_user.role in ['docente', 'super_admin'] %}
+    <article class="info-card">
+      <h2>Revision del instructor</h2>
+      <form method="post" action="{{ url_for('evidences.observe', submission_id=submission.id) }}">
+        <textarea name="observations" rows="4" placeholder="Observaciones para el aprendiz">{{ submission.observations or '' }}</textarea>
+        <button class="ghost-btn" type="submit">Guardar observaciones</button>
+      </form>
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('evidences.approve', submission_id=submission.id) }}">
+        {% if signature %}
+          <p>Firma cargada: {{ signature.file_name }}</p>
+        {% else %}
+          <p>Carga tu firma para aprobar la primera evidencia.</p>
+        {% endif %}
+        <input type="file" name="signature" accept="image/*">
+        <button class="primary-btn" type="submit">Firmar y aprobar</button>
+      </form>
+    </article>
+    {% endif %}
+  </div>
+
+  <div class="detail-column">
+    <article class="info-card evidence-preview-card">
+      <h2>Previsualizacion</h2>
+      {% if submission.file_path %}
+        {% if submission.file_name and submission.file_name.lower().endswith('.pdf') %}
+          <iframe class="pdf-preview" src="{{ url_for('evidences.preview', submission_id=submission.id) }}"></iframe>
+        {% else %}
+          <p>Este archivo no es PDF. Puedes descargarlo para revisarlo.</p>
+        {% endif %}
+        <a class="ghost-btn" href="{{ url_for('evidences.download', submission_id=submission.id) }}">Descargar documento</a>
+      {% else %}
+        <p class="empty-state">Aun no se ha cargado ningun archivo.</p>
+      {% endif %}
+    </article>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Evidencias | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Evidencias</h1>
+    <p>Seguimiento de entregas por aprendiz, ficha y tipo de evidencia.</p>
+  </div>
+</section>
+
+{% if current_user.role != 'aprendiz' %}
+<section class="panel filter-panel evidence-filter-panel">
+  <div class="panel__header panel__header--left">
+    <span class="filter-icon">≡</span>
+    <h2>Filtros y busqueda</h2>
+  </div>
+  <form class="filters-grid filters-grid--four" method="get">
+    <select name="group_number">
+      <option value="">Todas las fichas</option>
+      {% for group in groups %}
+        <option value="{{ group }}" {% if request.args.get('group_number') == group %}selected{% endif %}>Ficha {{ group }}</option>
+      {% endfor %}
+    </select>
+    <select name="evidence_type">
+      <option value="">Todos los tipos</option>
+      {% for item in evidence_types %}
+        <option value="{{ item }}" {% if request.args.get('evidence_type') == item %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+    <select name="status">
+      <option value="">Todos los estados</option>
+      {% for key, label in status_labels.items() %}
+        <option value="{{ key }}" {% if request.args.get('status') == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button class="primary-btn" type="submit">Filtrar</button>
+    <a class="ghost-btn" href="{{ url_for('evidences.index') }}">Limpiar</a>
+  </form>
+</section>
+{% endif %}
+
+<section class="stats-grid">
+  {% for type, item in summary.items() %}
+  <article class="stat-card evidence-stat-card">
+    <h3>{{ type }}</h3>
+    <strong>{{ item.approved }} de {{ item.total }}</strong>
+    <small>Aprobadas</small>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="panel evidence-panel">
+  <div class="panel__header"><h2>Actividades asignadas</h2></div>
+  <div class="evidence-list">
+    {% for submission in submissions %}
+    <article class="evidence-item">
+      <div>
+        <strong>{{ submission.activity.title }}</strong>
+        <p>{{ submission.activity.evidence_type }} - {{ submission.apprentice.full_name }} - Ficha {{ submission.apprentice.group_number }}</p>
+        <div class="evidence-meta">
+          Estado:
+          <span class="evidence-status" style="--status-color: {{ submission.status_color }}">{{ submission.status_label }}</span>
+          {% if submission.activity.due_start or submission.activity.due_end %}
+            - Entre {{ submission.activity.due_start or 'sin inicio' }} y {{ submission.activity.due_end or 'sin fin' }}
+          {% endif %}
+        </div>
+        <p>{{ submission.observations or 'Sin observaciones del instructor' }}</p>
+      </div>
+      <div class="toolbar__actions">
+        <a class="ghost-btn" href="{{ url_for('evidences.detail', submission_id=submission.id) }}">Revisar</a>
+      </div>
+    </article>
+    {% else %}
+    <p class="empty-state">No hay evidencias asignadas todavia.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
