@@ -1,4 +1,4 @@
-# GIA-SENA
-GIA: Gestion Integral de Aprendices
+# GIA: Gestión Integral de Aprendices
+
 
 
