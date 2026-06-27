@@ -1,2 +1,3 @@
-# GIA-SENA
-Gestion Integral de Aprendices SENA
+# GIA | SENA - CTMAE
+
+GIA: Gestión Integral de Aprendices
