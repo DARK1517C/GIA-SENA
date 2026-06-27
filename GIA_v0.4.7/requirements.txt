@@ -1,0 +1,24 @@
+# requirements.txt for GIA project (recommended minimum)
+Flask>=2.3.3
+Werkzeug>=2.3.6
+Jinja2>=3.1.2
+itsdangerous>=2.1.2
+click>=8.1.7
+
+SQLAlchemy>=2.0.20
+Flask-SQLAlchemy>=3.1.1
+Flask-Login>=0.6.2
+Flask-WTF>=1.1.1
+
+openpyxl>=3.1.2
+pandas>=2.1.0
+
+alembic>=1.11.1
+python-dotenv>=1.0.0
+
+Pillow
+reportlab
+PyPDF2
+
+# Optional / deployment
+gunicorn>=20.1.0

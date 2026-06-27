@@ -1,0 +1,253 @@
+{# templates/evidence/detail.html #}
+{% extends "base.html" %}
+
+{# Título de la página: usar el título de la actividad #}
+{% block title %}{{ submission.activity.title }} | GIA{% endblock %}
+
+{% block content %}
+
+{# Back link: volver al listado de evidencias #}
+<a class="back-link" href="{{ url_for('evidences.index') }}">‹ Volver a evidencias</a>
+
+{# -------------------------
+   Hero card: título, aprendiz y estado
+   - status_color y status_label vienen del modelo Submission
+   ------------------------- #}
+<section class="hero-card" aria-labelledby="evidence-title">
+  <div>
+    <h1 id="evidence-title">{{ submission.activity.title }}</h1>
+    <p class="muted">{{ submission.apprentice.full_name }} • Grupo {{ submission.apprentice.group_number }}</p>
+  </div>
+
+  <span class="evidence-status evidence-status--large"
+        role="status"
+        aria-live="polite"
+        style="--status-color: {{ submission.status_color }}">
+    {{ submission.status_label }}
+  </span>
+</section>
+
+{# -------------------------
+   Layout principal: dos columnas
+   - Izquierda: metadatos, subida, revisión
+   - Derecha: previsualización, modal y historial
+   ------------------------- #}
+<section class="detail-layout">
+
+  {# -------------------------
+     Columna izquierda: metadatos y acciones
+     ------------------------- #}
+  <div class="detail-column">
+
+    {# Entrega: metadatos de la actividad y archivo asociado #}
+    <article class="info-card" aria-labelledby="entrega-heading">
+      <h2 id="entrega-heading">Entrega</h2>
+      <dl>
+        <dt>Tipo</dt>
+        <dd>{{ submission.activity.evidence_type or '—' }}</dd>
+
+        <dt>Descripción</dt>
+        <dd>{{ submission.activity.description or 'Sin descripción' }}</dd>
+
+        <dt>Rango de entrega</dt>
+        <dd>
+          Entre {{ submission.activity.due_start or 'sin fecha inicial' }}
+          y {{ submission.activity.due_end or 'sin fecha final' }}
+        </dd>
+
+        <dt>Archivo</dt>
+        <dd>
+          {% if submission.file_name %}
+            {{ submission.file_name }}
+          {% else %}
+            <span class="muted">Sin archivo cargado</span>
+          {% endif %}
+        </dd>
+      </dl>
+    </article>
+
+    {# Subir evidencia: solo si el usuario tiene permiso y la entrega no está aprobada #}
+    {% if current_user.role in ['aprendiz', 'docente', 'super_admin'] and submission.status != 'aprobado' %}
+      <article class="info-card" aria-labelledby="subir-heading">
+        <h2 id="subir-heading">Subir evidencia</h2>
+
+        <form method="post" enctype="multipart/form-data"
+              action="{{ url_for('evidences.upload', submission_id=submission.id) }}"
+              class="filters-grid" aria-describedby="subir-help">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% endif %}
+
+          <p id="subir-help" class="muted">Adjunta el archivo que corresponde a esta evidencia</p>
+
+          <label class="sr-only" for="evidence_file">Archivo de evidencia</label>
+          <input id="evidence_file" type="file" name="file" required aria-required="true">
+
+          <div class="form-actions">
+            <button class="primary-btn" type="submit">Enviar evidencia</button>
+          </div>
+        </form>
+      </article>
+    {% endif %}
+
+    {# Revisión del instructor: observaciones y firma/aprobación (solo para docentes y super_admin) #}
+    {% if current_user.role in ['docente', 'super_admin'] %}
+      <article class="info-card" aria-labelledby="revision-heading">
+        <h2 id="revision-heading">Revisión del instructor</h2>
+
+        {# Observaciones #}
+        <form method="post" action="{{ url_for('evidences.observe', submission_id=submission.id) }}">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% endif %}
+          <label for="observations" class="sr-only">Observaciones para el aprendiz</label>
+          <textarea id="observations" name="observations" rows="4" placeholder="Observaciones para el aprendiz">{{ submission.observations or '' }}</textarea>
+
+          <div class="form-actions" style="margin-top:8px;">
+            <button class="ghost-btn" type="submit">Guardar observaciones</button>
+          </div>
+        </form>
+
+        <hr class="separator" />
+
+        {# Firma y aprobación #}
+        <form method="post" enctype="multipart/form-data" action="{{ url_for('evidences.approve', submission_id=submission.id) }}">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% endif %}
+
+          {% if signature %}
+            <p class="muted">Firma cargada: {{ signature.file_name }}</p>
+          {% else %}
+            <p class="muted">Carga tu firma para aprobar la evidencia.</p>
+          {% endif %}
+
+          <label class="sr-only" for="signature_file">Firma (imagen)</label>
+          <input id="signature_file" type="file" name="signature" accept="image/*">
+
+          <div class="form-actions" style="margin-top:8px;">
+            <button class="primary-btn" type="submit">Firmar y aprobar</button>
+          </div>
+        </form>
+      </article>
+    {% endif %}
+
+  </div> {# fin columna izquierda #}
+
+  {# -------------------------
+     Columna derecha: previsualización, modal y historial
+     ------------------------- #}
+  <div class="detail-column">
+
+    {# Previsualización: tarjeta principal #}
+    <article class="info-card evidence-preview-card" aria-labelledby="preview-heading">
+      <h2 id="preview-heading">Abrir y descarga de evidencia</h2>
+
+      {# Acciones rápidas: abrir modal (PDF) y descarga #}
+      <div class="preview-actions">
+        {% if submission.file_path and submission.file_name %}
+          {% if submission.file_name.lower().endswith('.pdf') %}
+            <button type="button" class="primary-btn" id="openPdfModalBtn">Abrir archivo</button>
+          {% endif %}
+          <a class="ghost-btn" href="{{ url_for('evidences.download', submission_id=submission.id) }}">Descargar</a>
+        {% else %}
+          <span class="muted">No hay archivo para previsualizar</span>
+        {% endif %}
+      </div>
+
+      {# Inline preview (solo si quieres mostrar algo en la tarjeta) #}
+      {% if submission.file_path %}
+        {% if submission.file_name and submission.file_name.lower().endswith('.pdf') %}
+        <!--  <div class="preview-frame" role="region" aria-label="Previsualización PDF">
+            <iframe class="pdf-preview" src="{{ url_for('evidences.preview', submission_id=submission.id) }}" title="Previsualización PDF"></iframe>
+          </div> -->
+        {% else %}
+          {% if submission.thumbnail_url %}
+            <div class="file-thumbnail">
+              <img src="{{ submission.thumbnail_url }}" alt="Miniatura del archivo">
+            </div>
+          {% else %}
+            <p class="empty-state">Este archivo no es PDF. Puedes descargarlo para revisarlo.</p>
+          {% endif %}
+        {% endif %}
+      {% else %}
+        <p class="empty-state">Aún no se ha cargado ningún archivo.</p>
+      {% endif %}
+
+      {# Opcional: reemplazar archivo directamente desde la tarjeta (aprendiz) #}
+      {% if current_user.role in ['aprendiz'] and submission.status != 'aprobado' %}
+        <form method="post" enctype="multipart/form-data" action="{{ url_for('evidences.upload', submission_id=submission.id) }}" style="margin-top:12px;">
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% endif %}
+          <label class="sr-only" for="replace_file">Reemplazar archivo</label>
+          <input id="replace_file" type="file" name="file" required>
+          <button class="ghost-btn" type="submit" style="margin-left:8px;">Reemplazar</button>
+        </form>
+      {% endif %}
+    </article>
+
+    {# Historial de acciones (si existe) #}
+    {% if submission.history %}
+      <article class="info-card" aria-labelledby="history-heading">
+        <h2 id="history-heading">Historial</h2>
+        <ul class="compact-list">
+          {% for h in submission.history %}
+            <li>
+              <strong>{{ h.actor_name }}</strong>
+              <span class="muted">— {{ h.action }} ({{ h.created_at }})</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </article>
+    {% endif %}
+
+  </div> {# fin columna derecha #}
+
+</section>
+
+{# -------------------------
+   Modal full-screen para previsualización PDF
+   - Se coloca al final del template para que esté fuera del flujo visual
+   - El JS que controla apertura/cierre debe estar en base.html o en un bundle
+   ------------------------- #}
+{% if submission.file_path and submission.file_name and submission.file_name.lower().endswith('.pdf') %}
+  <div id="pdfModal" class="pdf-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pdfModalTitle">
+    <div class="pdf-modal__backdrop" data-action="close"></div>
+
+    <div class="pdf-modal__panel" role="document">
+      <header class="pdf-modal__header">
+        <div class="pdf-modal__header-left">
+          <h2 id="pdfModalTitle">{{ submission.activity.title }}</h2>
+          <div class="pdf-modal__meta muted">{{ submission.apprentice.full_name }} — Ficha {{ submission.apprentice.group_number }}</div>
+        </div>
+
+        <div class="pdf-modal__header-right">
+          <a class="ghost-btn" href="{{ url_for('evidences.download', submission_id=submission.id) }}" target="_blank" rel="noopener">Descargar</a>
+          <button class="pdf-modal__close" aria-label="Cerrar previsualizador" data-action="close">&times;</button>
+        </div>
+      </header>
+
+      <!--<div class="pdf-modal__toolbar" role="toolbar" aria-label="Herramientas de previsualización">
+        <div class="toolbar-left">
+          <button type="button" class="tool-btn" data-action="zoom-out" title="Alejar">−</button>
+          <button type="button" class="tool-btn" data-action="zoom-in" title="Acercar">+</button>
+          <button type="button" class="tool-btn" data-action="rotate" title="Rotar">⤾</button>
+        </div>
+        <div class="toolbar-right">
+          <button type="button" class="ghost-btn" data-action="print">Imprimir</button>
+        </div>
+      </div> -->
+
+      <div class="pdf-modal__content" id="pdfModalContent">
+        <iframe id="pdfModalIframe" class="pdf-modal__iframe"
+                src="{{ url_for('evidences.preview', submission_id=submission.id) }}"
+                title="Previsualización PDF"
+                frameborder="0"
+                aria-label="Previsualización del documento PDF"></iframe>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

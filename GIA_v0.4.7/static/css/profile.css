@@ -1,0 +1,185 @@
+
+.profile-grid { 
+    display: grid;  
+    gap: 16px; 
+    align-items: start; 
+}
+
+.profile-info-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  gap: 16px;
+}
+
+/* contenedor izquierdo: avatar + texto */
+.profile-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* avatar circular grande (compatible img o fallback) */
+.avatar-large {
+  width: 90px;
+  height: 90px;
+  min-width: 90px;
+  min-height: 90px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 28px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* imagen dentro del avatar: cubrir y mantener proporción */
+.avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  }
+
+
+/* nombre y rol */
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.profile-role {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+  margin: -4px 0 0;
+}
+
+/* acciones a la derecha */
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* responsive: en pantallas pequeñas apilar */
+@media (max-width: 720px) {
+  .profile-info-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .profile-left {
+    gap: 12px;
+  }
+  .profile-actions {
+    justify-content: flex-end;
+  }
+}
+
+
+.profile-card { 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow); 
+}
+
+.profile-form { background:#fff; padding:1rem; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.04); }
+.profile-form label { display:block; margin-top:.75rem; font-weight:600; }
+.profile-form input[type="text"], .profile-form input[type="email"], .profile-form input[type="password"] { width:100%; padding:.5rem; border:1px solid #ddd; border-radius:4px; }
+.two-columns { display:flex; gap:1rem; }
+.two-columns > div { flex:1; }
+.form-actions { margin-top:1rem; display:flex; gap:.5rem; align-items:center; }
+
+/* Contenedor de la fila de contraseñas */
+.password-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 12px 0 0;
+}
+
+/* Cada campo flotante (nuevo nombre: floating-field) */
+.floating-field {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+/* Input estilo */
+.floating-field input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--space-xs);
+  padding: 0 12px;
+  font-size: 14px;
+  background: transparent;
+}
+
+/* Label flotante */
+.floating-field label {
+  position: absolute;
+  left: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--line);
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+/* Estado: foco o input con valor -> label sube */
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label {
+  top: -2px;
+  left: var(--space-sm);
+  font-size: 12px;
+  color: var(--darkgreen);
+  background: var(--surface);
+  padding: 0 4px;
+}
+
+/* Borde activo */
+.floating-field input:focus {
+  border-color: var(--darkgreen);
+  outline: none;
+}
+
+/* Ajuste para que el label no corte el borde redondeado */
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label {
+  border-radius: 4px;
+}
+
+/* Responsive: apilar en pantallas pequeñas */
+@media (max-width: 720px) {
+  .password-row {
+    flex-direction: column;
+  }
+}

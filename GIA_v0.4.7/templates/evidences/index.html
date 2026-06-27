@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Evidencias | GIA{% endblock %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Evidencias</h1>
+    <p>Entregas hechas por el aprendiz según el tipo de evidencia</p>
+  </div>
+</section>
+
+{# Stat cards (igual que apprentices/detail) #}
+<section class="stats-grid">
+  {% for type, item in evidence_summary.items() %}
+  <article class="stat-card">
+    <span class="stat-icon">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-label="Certificate">
+        <path d="M18 10a4 4 0 0 1 3 6.648v4.6a.75.75 0 0 1-1.09.67l-.09-.055L18 20.591l-1.82 1.272a.75.75 0 0 1-1.172-.51l-.007-.105v-4.602A4 4 0 0 1 18 10Zm1.5 7.71a3.99 3.99 0 0 1-1.5.291 3.99 3.99 0 0 1-1.5-.291v2.099l1.071-.747a.75.75 0 0 1 .759-.06l.1.06 1.07.747V17.71Zm-.25-14.706a2.75 2.75 0 0 1 2.745 2.582l.005.168.001 5.246a5.027 5.027 0 0 0-1.5-1.331L20.5 5.754a1.25 1.25 0 0 0-1.122-1.244l-.128-.006H4.75a1.25 1.25 0 0 0-1.244 1.122l-.006.128v9.5c0 .647.492 1.18 1.122 1.243l.128.007 8.922.001.123.203.134.196.071.094-.001 1.006H4.75a2.75 2.75 0 0 1-2.745-2.583L2 15.254v-9.5a2.75 2.75 0 0 1 2.582-2.745l.168-.005h14.5ZM18 11.5a2.5 2.5 0 1 0 0 5.001 2.5 2.5 0 0 0 0-5.001Zm-6.75 1a.75.75 0 0 1 .102 1.493L11.25 14h-4.5a.75.75 0 0 1-.102-1.493l.102-.007h4.5Zm6-5.5a.75.75 0 0 1 .102 1.493l-.102.007H6.75a.75.75 0 0 1-.102-1.493L6.75 7h10.5Z"/>
+      </svg>
+    </span>
+    <h3>{{ type }}</h3>
+    <strong>{{ item.approved }} de {{ item.total }}</strong>
+    <small>Aprobadas</small>
+  </article>
+  {% endfor %}
+</section>
+
+{# Evidencias agrupadas por submission.activity.evidence_type (igual que apprentices/detail) #}
+<section class="evidence-overview" aria-label="Evidencias del aprendiz">
+  <div class="evidence-grid">
+    {% if evidence_groups %}
+      {% for etype, info in evidence_groups.items() %}
+        <article class="evidence-card" data-etype="{{ etype|e }}">
+          <header class="evidence-card__head" role="button" tabindex="0" aria-expanded="false">
+            <div class="evidence-card__title">
+              <strong>{{ etype }}</strong>
+              <small class="muted">({{ info.total_files }} archivos)</small>
+            </div>
+            <div class="evidence-card__meta">
+              <span class="badge badge--approved">{{ info.approved }} aprobados</span>
+              <span class="badge badge--pending">{{ info.pending }} pendientes</span>
+              <span class="chev">▾</span>
+            </div>
+          </header>
+
+          <div class="evidence-card__body" hidden>
+            {% for submission in info.submissions %}
+              <div class="submission-block">
+                <div class="submission-header">
+                  <div>
+                    <strong>{{ submission.activity.title or submission.activity.name or 'Actividad' }}</strong>
+                    <div class="muted small">Enviado: {{ submission.submitted_at or '-' }}</div>
+                  </div>
+                  <div class="submission-count">
+                    <small class="muted">{{ submission.evidences|length }} archivo(s)</small>
+                    <a class="ghost-btn" href="{{ url_for('evidences.detail', submission_id=submission.id) }}">Ver envío</a>
+                  </div>
+                </div>
+
+                <ul class="submission-evidence-list">
+                  {% for ev in submission.evidences %}
+                    <li class="evidence-item">
+                      <a href="{{ ev.url or url_for('evidences.download', submission_id=ev.id) }}" target="_blank" rel="noopener">
+                        <span class="evidence-name">{{ ev.filename or 'Archivo' }}</span>
+                      </a>
+                      <div class="evidence-right">
+                        <span class="status {% if ev.status|lower == 'aprobado' %}status--approved{% elif ev.status|lower == 'pendiente' or ev.status|lower == 'pendiente_aprobacion' %}status--pending{% else %}status--missing{% endif %}">
+                          {{ ev.status or 'Sin estado' }}
+                        </span>
+                        <small class="muted">{{ ev.submitted_at or '' }}</small>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endfor %}
+          </div>
+        </article>
+      {% endfor %}
+    {% else %}
+      <p class="empty-state">No hay evidencias asociadas.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Acceder | GIA{% endblock %}
+{% block body_class %}login-body{% endblock %}
+
+{% block content %}
+<section class="login-layout">
+  
+  <!-- Tarjeta principal de login -->
+  <div class="login-card">
+    
+    <!-- Marca / Logo -->
+    <div class="login-brand">
+      <img class="brand-logo" src="{{ url_for('static', filename='img/logo-gia.svg') }}" alt="logo-gia">
+    </div>
+
+    <!-- Título -->
+    <h1>Iniciar sesión</h1>
+
+    <!-- Formulario de acceso -->
+    <form method="post" class="login-form" action="{{ url_for('auth.login') }}">
+      
+      <!-- Campo usuario -->
+      <div class="form-group">
+        <input id="username" type="text" name="username" placeholder=" " required>
+        <label for="username">Usuario</label>
+      </div>
+
+      <!-- Campo contraseña -->
+      <div class="form-group">
+        <input id="password" type="password" name="password" placeholder=" " required>
+        <label for="password">Contraseña</label>
+      </div>
+
+      <!-- Acciones: botón y enlace -->
+      <div class="login-actions">
+        <button type="submit" class="login-btn">Acceder</button>
+        <a href="#" class="forgot-link">¿Has olvidado tu contraseña?</a>
+      </div>
+    </form>
+
+    <!-- Footer con enlace institucional -->
+    <p class="login-footer-text">
+      <a href="https://ctmasena.blogspot.com/" target="_blank" rel="noopener noreferrer">
+        Complejo Tecnológico Minero Agroempresarial
+      </a>
+    </p>
+  </div>
+</section>
+{% endblock %}

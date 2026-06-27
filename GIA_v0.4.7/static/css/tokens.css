@@ -1,0 +1,62 @@
+:root {
+  /* Tipofrafia */
+  --font-family: 'Work Sans', sans-serif;
+
+  /* Colores neutrales (fondos, textos e iconos no interactivos)*/
+  --colorneutral-1: #ffffff;
+  --colorneutral-2: #f3f3f3;
+  --colorneutral-3: #d2d2d2;
+  --colorneutral-4: #706f6e;
+  --colorneutral-5: #404040;
+  --colorneutral-6: #222222;
+
+  /* Colores activos (textos estadisticos e iconos interactivos)*/
+  --colorgreen-1: #39a900;
+  --colorgreen-2: #007832;
+  --colornavy-1: #00304d;
+  --colorcyan-1: #09daf6;
+  --colorviolet-1: #71277a;
+  --coloryellow-1: #fdc300;
+  --colororange-1: #ff6b00;
+  --colorred-1: #d13438;
+  --colorred-2: #a32f2f;
+
+  /* Espaciado (múltiplos de 4px) */
+  --space-s: 4px;
+  --space-m: 8px;
+  --space-l: 12px;
+  --space-xl: 16px;
+
+  /* Radios y sombras */
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+  --shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+
+/* Tokens de primera version */
+
+
+/* Colores institucionales */
+  --green: #39a900;
+  --darkgreen: #007832;
+  --navy: #00304d;
+  --cyan: #09daf6;
+  --danger: #d13438;
+  --darkdanger: #a32f2f;
+  --muted: #706f6e;
+  --darkmuted: #404040;
+  --text: #222;
+  --surface: #fff;
+  --bg: #f3f3f3;
+  --line: #d2d2d2;
+
+  /* Espaciado (múltiplos de 4px) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+
+  /* Radios y sombras */
+  --radius: 12px;
+}

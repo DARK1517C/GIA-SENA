@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Usuarios | GIA{% endblock %}
+
+{% block content %}
+
+<!-- ===========================
+     CABECERA DE PÁGINA
+     =========================== -->
+<section class="page-head page-head--split">
+  <div>
+    <h1>Gestión de Usuarios</h1>
+    <p>Administra usuarios, roles y permisos dentro de la plataforma.</p>
+  </div>
+  
+  <!-- Acciones disponibles solo para super_admin -->
+  <div class="page-actions">
+    {% if _user and _user.role == 'super_admin' %}
+      <details class="action-menu">
+        <summary aria-label="Más acciones">☰</summary>
+        <button type="button" data-enable-bulk="users-management">Seleccionar usuarios</button>
+      </details>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ===========================
+     FORMULARIO CREAR USUARIO
+     =========================== -->
+<section class="panel admin-panel">
+  <div class="panel__header"><h2>Nuevo usuario</h2></div>
+  
+  <form method="post" action="{{ url_for('users.create') }}" class="filters-grid filters-grid--five">
+    {% if csrf_token is defined %}
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% endif %}
+    
+    <input type="text" name="full_name" placeholder="Nombre completo" required>
+    <input type="text" name="username" placeholder="Usuario" required>
+    <input type="email" name="email" placeholder="Correo">
+    
+    <select name="role" required>
+      <option value="docente">Instructor</option>
+      <option value="visualizador">Administrativo</option>
+      <option value="super_admin">Super Admin</option>
+    </select>
+    
+    <input type="text" name="password" placeholder="Contraseña inicial" required>
+    <button type="submit" class="primary-btn">Crear usuario</button>
+  </form>
+</section>
+
+<!-- ===========================
+     LISTADO DE USUARIOS
+     =========================== -->
+<div id="users-management" class="management-list">
+  <section class="panel admin-panel">
+    
+    <!-- Encabezado listado -->
+    <div class="panel__header">
+      <div>
+        <h2>Listado de usuarios</h2>
+        <p class="muted-text">Ordenado por ID</p>
+      </div>
+      
+      <!-- Filtros de búsqueda -->
+      <form method="get" action="{{ url_for('users.index') }}" class="filters-grid filters-grid--three users-filter-form">
+        <input type="text" name="search" placeholder="Buscar por usuario, nombre o correo" value="{{ request.args.get('search', '') }}">
+        
+        <select name="role">
+          <option value="">Todos los roles</option>
+          <option value="super_admin" {% if request.args.get('role') == 'super_admin' %}selected{% endif %}>Super Admin</option>
+          <option value="docente" {% if request.args.get('role') == 'docente' %}selected{% endif %}>Instructor</option>
+          <option value="visualizador" {% if request.args.get('role') == 'visualizador' %}selected{% endif %}>Administrativo</option>
+          <option value="aprendiz" {% if request.args.get('role') == 'aprendiz' %}selected{% endif %}>Aprendiz</option>
+        </select>
+        
+        <button type="submit" class="ghost-btn">Filtrar</button>
+      </form>
+    </div>
+
+    <!-- Selección masiva (solo super_admin) -->
+    {% if _user and _user.role == 'super_admin' %}
+    <form id="bulk-users-form" method="post" action="{{ url_for('users.user_bulk_delete') }}" data-bulk-form class="bulk-selection">
+      {% if csrf_token is defined %}
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% endif %}
+      
+      <div class="bulk-bar bulk-bar--top">
+        <label class="select-all-pill">
+          <input type="checkbox" data-select-all>
+          <span data-select-count>Seleccionar todo</span>
+        </label>
+        
+        <div class="toolbar__actions">
+          <button type="button" class="ghost-btn" data-disable-bulk="users-management">Cancelar</button>
+          <button type="submit" class="danger-btn" onclick="return confirm('¿Eliminar los usuarios seleccionados?');">Eliminar seleccionados</button>
+        </div>
+      </div>
+    </form>
+    {% endif %}
+
+    <!-- Tabla de usuarios -->
+    <div class="table-wrap">
+      <table class="data-table admin-table">
+        <thead>
+          <tr>
+            <th class="select-cell bulk-only"></th>
+            <th>Usuario</th>
+            <th>Nombre completo</th>
+            <th>Rol</th>
+            <th>Correo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <!-- Checkbox selección masiva -->
+            <td class="select-cell bulk-only">
+              {% if user.id != current_user.id %}
+                <input type="checkbox" name="selected_ids" value="{{ user.id }}" form="bulk-users-form" data-select-item>
+              {% endif %}
+            </td>
+            
+            <!-- Datos usuario -->
+            <td>{{ user.username }}<br><small>ID: {{ user.id }}</small></td>
+            <td>{{ user.full_name }}</td>
+            <td><span class="badge badge--violet">{{ role_labels.get(user.role, user.role) }}</span></td>
+            <td>{{ user.email or 'Sin correo' }}</td>
+            
+            <!-- Acciones -->
+            <td class="actions-cell">
+              {% if user.id != current_user.id %}
+                <form method="post" action="{{ url_for('users.delete', user_id=user.id) }}" onsubmit="return confirm('¿Eliminar este usuario?');">
+                  {% if csrf_token is defined %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  {% endif %}
+                  <button type="submit" class="danger-btn danger-btn--compact">Eliminar</button>
+                </form>
+              {% else %}
+                <span class="badge">Sesión actual</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="empty-state">No hay usuarios registrados.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+{% endblock %}
