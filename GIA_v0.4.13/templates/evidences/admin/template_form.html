@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% set editing = template is not none %}
+{% block title %}{{ 'Editar' if editing else 'Nueva' }} plantilla | GIA{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{{ 'Editar plantilla' if editing else 'Nueva plantilla' }}</h1><p class="muted">Plantilla institucional desde la que se proyectan actividades.</p></div><a class="ghost-btn" href="{{ url_for('evidence_admin.index') }}">Cancelar</a></div>
+<article class="info-card"><form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="category_id">Categoría</label><select id="category_id" name="category_id" required>{% for c in categories %}<option value="{{ c.id }}" {% if editing and template.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+<label for="code">Código</label><input id="code" name="code" required value="{{ template.code if editing else request.form.get('code','') }}">
+<label for="title">Título</label><input id="title" name="title" required value="{{ template.title if editing else request.form.get('title','') }}">
+<label for="description">Descripción</label><textarea id="description" name="description" rows="4">{{ template.description if editing else request.form.get('description','') }}</textarea>
+<label for="allowed_extensions">Extensiones permitidas</label><input id="allowed_extensions" name="allowed_extensions" placeholder="pdf, docx, xlsx" value="{{ template.allowed_extensions if editing else request.form.get('allowed_extensions','') }}">
+<label for="max_file_size_mb">Tamaño máximo (MB)</label><input id="max_file_size_mb" name="max_file_size_mb" type="number" min="0" value="{{ template.max_file_size_mb if editing else request.form.get('max_file_size_mb','') }}">
+<label><input type="checkbox" name="requires_signature" {% if editing and template.requires_signature %}checked{% endif %}> Requiere firma</label>
+<label><input type="checkbox" name="is_required" {% if not editing or template.is_required %}checked{% endif %}> Obligatoria</label>
+<label for="sort_order">Orden</label><input id="sort_order" name="sort_order" type="number" min="0" value="{{ template.sort_order if editing else request.form.get('sort_order','0') }}">
+<label><input type="checkbox" name="is_active" {% if not editing or template.is_active %}checked{% endif %}> Activa</label>
+<div class="form-actions"><button class="primary-btn" type="submit">Guardar plantilla</button></div>
+</form></article>
+{% endblock %}

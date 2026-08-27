@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% set editing = activity is not none %}
+{% block title %}{{ 'Editar' if editing else 'Nueva' }} actividad | GIA{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{{ 'Editar actividad' if editing else 'Nueva actividad' }}</h1><p class="muted">Actividad concreta de una ficha. Puede provenir de una plantilla o ser personalizada.</p></div><a class="ghost-btn" href="{{ url_for('evidence_admin.index') }}">Cancelar</a></div>
+<article class="info-card"><form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="group_id">Ficha</label><select id="group_id" name="group_id" required>{% for g in groups %}<option value="{{ g.id }}" {% if editing and activity.group_id == g.id %}selected{% endif %}>{{ g.group_number }} — {{ g.program_name }}</option>{% endfor %}</select>
+<label for="origin">Origen</label><select id="origin" name="origin" required><option value="template" {% if editing and activity.origin == 'template' %}selected{% endif %}>Plantilla institucional</option><option value="custom" {% if not editing or activity.origin == 'custom' %}selected{% endif %}>Personalizada</option></select>
+<label for="template_id">Plantilla</label><select id="template_id" name="template_id"><option value="">— Ninguna —</option>{% for t in templates %}<option value="{{ t.id }}" {% if editing and activity.template_id == t.id %}selected{% endif %}>{{ t.code }} — {{ t.title }} ({{ t.category.name }})</option>{% endfor %}</select>
+<label for="category_id">Categoría (solo actividades personalizadas)</label><select id="category_id" name="category_id">{% for c in categories %}<option value="{{ c.id }}" {% if editing and activity.category_id == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+<label for="code">Código</label><input id="code" name="code" value="{{ activity.code if editing else request.form.get('code','') }}">
+<label for="title">Título</label><input id="title" name="title" required value="{{ activity.title if editing else request.form.get('title','') }}">
+<label for="description">Descripción</label><textarea id="description" name="description" rows="4">{{ activity.description if editing else request.form.get('description','') }}</textarea>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><label for="due_start">Inicio de entrega</label><input id="due_start" name="due_start" value="{{ activity.due_start if editing else request.form.get('due_start','') }}"></div><div><label for="due_end">Fin de entrega</label><input id="due_end" name="due_end" value="{{ activity.due_end if editing else request.form.get('due_end','') }}"></div></div>
+<label for="allowed_extensions">Extensiones permitidas</label><input id="allowed_extensions" name="allowed_extensions" placeholder="pdf, docx, xlsx" value="{{ activity.allowed_extensions if editing else request.form.get('allowed_extensions','') }}">
+<label for="max_file_size_mb">Tamaño máximo (MB)</label><input id="max_file_size_mb" name="max_file_size_mb" type="number" min="0" value="{{ activity.max_file_size_mb if editing else request.form.get('max_file_size_mb','') }}">
+<label><input type="checkbox" name="requires_signature" {% if editing and activity.requires_signature %}checked{% endif %}> Requiere firma</label>
+<label><input type="checkbox" name="is_required" {% if not editing or activity.is_required %}checked{% endif %}> Obligatoria</label>
+<label><input type="checkbox" name="is_visible" {% if not editing or activity.is_visible %}checked{% endif %}> Visible</label>
+<label><input type="checkbox" name="is_default" {% if not editing or activity.is_default %}checked{% endif %}> Actividad predeterminada</label>
+<label for="sort_order">Orden</label><input id="sort_order" name="sort_order" type="number" min="0" value="{{ activity.sort_order if editing else request.form.get('sort_order','0') }}">
+<div class="form-actions"><button class="primary-btn" type="submit">Guardar actividad</button></div>
+</form></article>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const origin=document.getElementById('origin');
+  const template=document.getElementById('template_id');
+  const category=document.getElementById('category_id');
+  function sync(){
+    const fromTemplate=origin.value==='template';
+    template.disabled=!fromTemplate;
+    category.disabled=fromTemplate;
+  }
+  origin.addEventListener('change',sync); sync();
+});
+</script>
+{% endblock %}

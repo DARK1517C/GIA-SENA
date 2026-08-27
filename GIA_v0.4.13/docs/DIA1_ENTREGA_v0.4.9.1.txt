@@ -1,0 +1,14 @@
+GIA v0.4.9.1 — ENTREGABLE DÍA 1
+
+Objetivo: facilitar el levantamiento reproducible y la validación del bootstrap.
+
+Incluye:
+- scripts/day1_preflight.py
+- scripts/day1_smoke.py
+- scripts/setup_windows_day1.ps1
+- docs/DIA1_LEVANTAMIENTO.md
+
+Las correcciones funcionales y de seguridad principales de v0.4.9 se conservan.
+
+No se declara aún que el E2E completo haya pasado: el smoke HTTP debe ejecutarse en
+un entorno con las dependencias instaladas.

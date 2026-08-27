@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Certificación{% endblock %}
+{% block content %}
+<section class="page-head"><div><h1>Certificación</h1><p>Verificación de requisitos y estado de certificación de los aprendices.</p></div></section>
+<section class="panel">
+  <table class="table">
+    <thead><tr><th>Aprendiz</th><th>Grupo</th><th>Requisitos</th><th>Seguimiento</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.apprentice.full_name }}</td>
+        <td>{{ row.apprentice.group.code if row.apprentice.group else 'Sin grupo' }}</td>
+        <td>{{ 'Cumplidos' if row.requirements_ok else 'Pendientes' }}</td>
+        <td>{{ 'Cumplido' if row.followup_ok else 'Pendiente' }}</td>
+        <td>{% if row.certified %}Certificado{% elif row.ready %}Listo para aprobación{% else %}En verificación{% endif %}</td>
+        <td><a class="btn btn-secondary" href="{{ url_for('certification.detail', apprentice_id=row.apprentice.id) }}">Revisar</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6">No hay aprendices disponibles.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

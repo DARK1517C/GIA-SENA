@@ -1,0 +1,868 @@
+{# templates/groups/detail.html #}
+{% extends "base.html" %}
+{% block title %}Grupo {{ group.group_number }} | GIA{% endblock %}
+{% block content %}
+
+{# -------------------------
+Back link (volver a lista)
+------------------------- #}
+
+{% if back_url is defined and back_url %}
+<a class="back-link" href="{{ back_url }}">‹ Volver a la lista de grupos</a>
+{% else %}
+<a class="back-link" href="{{ url_for('groups.index') }}">‹ Volver a la lista de grupos</a>
+{% endif %}
+
+{# ---------------------------------------------------------
+Hero card (encabezado del grupo)
+--------------------------------------------------------- #}
+
+{% set record = group %}
+
+{% set level_raw = (record.program_level or '') | normalize %}
+
+{% if 'tecnolog' in level_raw %}
+{% set level_class = 'group-card--tecnologo' %}
+{% elif 'tecnic' in level_raw %}
+{% set level_class = 'group-card--tecnico' %}
+{% elif 'oper' in level_raw %}
+{% set level_class = 'group-card--operario' %}
+{% else %}
+{% set level_class = '' %}
+{% endif %}
+
+<section class="hero-card {{ level_class }}">
+
+    <div>
+        <h1>Grupo {{ record.group_number }}</h1>
+        <p>{{ record.program_name or '' }}</p>
+    </div>
+
+    <div class="hero-actions">
+
+        {% if _user and _user.role in ['FOLLOW_UP_INSTRUCTOR', 'SUPPORT'] %}
+
+            {% if has_endpoint('groups.edit') %}
+            <a
+                class="icon-btn icon-btn--edit"
+                href="{{ url_for('groups.edit', id=record.id) }}"
+                aria-label="Editar grupo"
+                title="Editar grupo"
+            >
+                <svg
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                    focusable="false"
+                >
+                    <path
+                        d="M21.03 2.97a3.578 3.578 0 0 1 0 5.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L15.97 2.97a3.578 3.578 0 0 1 5.06 0ZM15 6.06 5.062 16a.75.75 0 0 0-.193.333l-1.05 3.85 3.85-1.05A.75.75 0 0 0 8 18.938L17.94 9 15 6.06Zm2.03-2.03-.97.97L19 7.94l.97-.97a2.079 2.079 0 0 0-2.94-2.94Z"
+                        fill="currentColor"
+                    />
+                </svg>
+            </a>
+            {% endif %}
+
+            {% if has_endpoint('groups.delete') %}
+            <form
+                method="post"
+                action="{{ url_for('groups.delete', id=record.id) }}"
+                onsubmit="return confirm('Eliminar esta ficha? Los aprendices asociados se conservaran y quedaran desasociados.');"
+                style="display:inline"
+            >
+                {% if csrf_token is defined %}
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}"
+                >
+                {% endif %}
+
+                <button
+                    type="submit"
+                    class="icon-btn icon-btn--danger"
+                    aria-label="Eliminar grupo"
+                    title="Eliminar grupo"
+                >
+                    <svg
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        focusable="false"
+                    >
+                        <path
+                            d="M12 1.75a3.25 3.25 0 0 1 3.245 3.066L15.25 5h5.25a.75.75 0 0 1 .102 1.493L20.5 6.5h-.796l-1.28 13.02a2.75 2.75 0 0 1-2.561 2.474l-.176.006H8.313a2.75 2.75 0 0 1-2.714-2.307l-.023-.174L4.295 6.5H3.5a.75.75 0 0 1-.743-.648L2.75 5.75a.75.75 0 0 1 .648-.743L3.5 5h5.25A3.25 3.25 0 0 1 12 1.75Zm6.197 4.75H5.802l1.267 12.872a1.25 1.25 0 0 0 1.117 1.122l.127.006h7.374c.6 0 1.109-.425 1.225-1.002l.02-.126L18.196 6.5ZM13.75 9.25a.75.75 0 0 1 .743.648L14.5 10v7a.75.75 0 0 1-1.493.102L13 17v-7a.75.75 0 0 1 .75-.75Zm-3.5 0a.75.75 0 0 1 .743.648L11 10v7a.75.75 0 0 1-1.493.102L9.5 17v-7a.75.75 0 0 1 .75-.75Zm1.75-6a1.75 1.75 0 0 0-1.744 1.606L10.25 5h3.5A1.75 1.75 0 0 0 12 3.25Z"
+                            fill="currentColor"
+                        />
+                    </svg>
+                </button>
+            </form>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+</section>
+
+{# ---------------------------------------------------------
+Layout principal: dos columnas (info general + fechas)
+--------------------------------------------------------- #}
+
+<section class="detail-layout detail-layout--two">
+
+    {# Información general del grupo #}
+
+    <article class="info-card">
+
+        <h2>
+            <span class="info-card__icon" aria-hidden="true">
+                <svg
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M12 1.999c5.524 0 10.002 4.478 10.002 10.002 0 5.523-4.478 10.001-10.002 10.001-5.524 0-10.002-4.478-10.002-10.001C1.998 6.477 6.476 1.999 12 1.999Zm0 1.5a8.502 8.502 0 1 0 0 17.003A8.502 8.502 0 0 0 12 3.5Zm-.004 7a.75.75 0 0 1 .744.648l.007.102.003 5.502a.75.75 0 0 1-1.493.102l-.007-.101-.003-5.502a.75.75 0 0 1 .75-.75ZM12 7.003a.999.999 0 1 1 0 1.997.999.999 0 0 1 0-1.997Z"
+                        fill="#212121"
+                    />
+                </svg>
+            </span>
+            Información general
+        </h2>
+
+        <div class="info-card__body">
+            <dl>
+
+                <dt>Municipio</dt>
+                <dd>
+                    {{ row.get('municipality_label') or 'Sin dato' }}
+                </dd>
+
+                <dt>Nivel del programa de formación</dt>
+                <dd>
+                    {{ row.get('program_level_label') or 'Sin dato' }}
+                </dd>
+
+                <dt>Modalidad</dt>
+                <dd>
+                    {{ row.get('modality_label') or 'Sin dato' }}
+                </dd>
+
+                <dt>Instructor líder de formación</dt>
+                <dd>
+                    {{ row.get('lead_instructor') or record.lead_instructor or 'Sin instructor' }}
+                </dd>
+
+                <dt>Instructor de etapa productiva</dt>
+                <dd>
+                    {{ row.get('followup_instructor') or record.followup_instructor or 'Sin instructor' }}
+                </dd>
+
+                <dt>Correo de instructor de etapa productiva</dt>
+                <dd>
+                    {{ record.followup_instructor_email or 'Sin correo' }}
+                </dd>
+
+                <dt>Estado de la formación</dt>
+                <dd>
+                    {{ row.get('sofia_group_status_label') or 'Sin estado' }}
+                </dd>
+
+            </dl>
+        </div>
+
+    </article>
+
+    {# Fechas y estado del grupo #}
+
+    <article class="info-card">
+
+        <h2>
+            <span class="info-card__icon" aria-hidden="true">
+                <svg
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path
+                        d="M17.75 3A3.25 3.25 0 0 1 21 6.25v11.5A3.25 3.25 0 0 1 17.75 21H6.25A3.25 3.25 0 0 1 3 17.75V6.25A3.25 3.25 0 0 1 6.25 3h11.5Zm1.75 5.5h-15v9.25c0 .966.784 1.75 1.75 1.75h11.5a1.75 1.75 0 0 0 1.75-1.75V8.5Zm-11.75 6a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm4.25 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm-4.25-4a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm4.25 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm4.25 0a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Zm1.5-6H6.25A1.75 1.75 0 0 0 4.5 6.25V7h15v-.75a1.75 1.75 0 0 0-1.75-1.75Z"
+                        fill="#212121"
+                    />
+                </svg>
+            </span>
+            Fechas
+        </h2>
+
+        <div class="info-card__body">
+            <dl>
+
+                <dt>Inicio de formación</dt>
+                <dd>
+                    {{ (row.get('group_start_date') or record.group_start_date)|date_dmY if (row.get('group_start_date') or record.group_start_date) else 'Sin dato' }}
+                </dd>
+
+                <dt>Inicio de etapa productiva</dt>
+                <dd>
+                    {{ (row.get('ep_start_date') or record.ep_start_date)|date_dmY if (row.get('ep_start_date') or record.ep_start_date) else 'Sin dato' }}
+                </dd>
+
+                <dt>Fin de formación</dt>
+                <dd>
+                    {{ (row.get('training_end_date') or record.training_end_date)|date_dmY if (row.get('training_end_date') or record.training_end_date) else 'Sin dato' }}
+                </dd>
+
+                <dt>Vigencia de grupo</dt>
+                <dd>
+                    {{ (row.get('group_validity') or record.group_validity)|date_dmY if (row.get('group_validity') or record.group_validity) else 'Sin dato' }}
+                </dd>
+
+            </dl>
+        </div>
+
+    </article>
+
+</section>
+
+{# ---------------------------------------------------------
+Estadísticas (cards)
+--------------------------------------------------------- #}
+
+<article class="info-card-apprendice-evidence">
+
+    <h2>
+        <span class="info-card__icon" aria-hidden="true">
+            <svg
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M8.5 5.247A2.249 2.249 0 0 1 10.75 3h2.5a2.249 2.249 0 0 1 2.25 2.247v1.769h3.25A2.249 2.249 0 0 1 21 9.263v10.988a.75.75 0 0 1-.75.749H3.75a.75.75 0 0 1-.75-.75v-7.99a2.249 2.249 0 0 1 2.25-2.248H8.5V5.247ZM10 19.503h4V5.247a.75.75 0 0 0-.75-.749h-2.5a.75.75 0 0 0-.75.75v14.254ZM8.5 11.51H5.25a.75.75 0 0 0-.75.749v7.242h4V11.51Zm7 7.99h4V9.264a.75.75 0 0 0-.75-.75H15.5v10.989Z"
+                    fill="#212121"
+                />
+            </svg>
+        </span>
+        Estadísticas del grupo
+    </h2>
+
+    <div class="stats-meta" role="status" aria-live="polite">
+
+        <small>
+            Fuente:
+
+            <strong>
+                {{ 'Cálculo en tiempo real' if stats_real_time else 'Precomputado / cacheado' }}
+            </strong>
+
+            • Última actualización:
+            {{ stats_last_updated or 'desconocida' }}
+
+            {% if stats_mismatch %}
+            • <span class="muted">Desalineación detectada</span>
+            {% endif %}
+        </small>
+
+        {% if _user and _user.role in ['FOLLOW_UP_INSTRUCTOR','SUPPORT'] and has_endpoint('groups.recalculate_stats') %}
+        <form
+            method="post"
+            action="{{ url_for('groups.recalculate_stats', id=record.id) }}"
+            style="display:inline;margin-left:0.75rem;"
+        >
+            {% if csrf_token is defined %}
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+            >
+            {% endif %}
+
+            <button
+                class="ghost-btn"
+                type="submit"
+                title="Forzar recálculo de métricas"
+            >
+                Recalcular métricas
+            </button>
+        </form>
+        {% endif %}
+
+    </div>
+
+</article>
+
+<section class="stats-grid" aria-label="Estadísticas del grupo">
+
+    {% set apprentices_list = apprentices if apprentices is defined else [] %}
+
+    {% set total_apprentices = row.get('apprentices_statistics') | int %}
+
+    {# Aprendices totales #}
+
+    <article
+        class="stat-card"
+        role="figure"
+        aria-label="Aprendices totales"
+    >
+        <span class="stat-icon">
+            <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+            >
+                <path
+                    d="M9.909 3.7a3.875 3.875 0 0 1 4.182 0l8.064 5.169a.75.75 0 0 1 .005 1.259L19 12.193v5.557a.75.75 0 0 1-.15.45l-.001.001-.001.002-.003.004-.009.01-.015.02a7.428 7.428 0 0 1-1.662 1.401C16.036 20.33 14.339 21 12 21s-4.036-.67-5.159-1.361a7.427 7.427 0 0 1-1.25-.957 5.317 5.317 0 0 1-.316-.33 2.719 2.719 0 0 1-.124-.15L5.15 18.2a.75.75 0 0 1-.15-.45v-5.557l-2-1.307v5.364a.75.75 0 0 1-1.5 0V9.5a.75.75 0 0 1 .358-.64l8.05-5.16Zm4.21 11.681a3.875 3.875 0 0 1-4.238 0L6.5 13.172v4.297a5.934 5.934 0 0 0 1.127.893C8.536 18.92 9.964 19.5 12 19.5s3.464-.58 4.373-1.139a5.935 5.935 0 0 0 1.127-.892v-4.297l-3.38 2.21Zm-.837-10.419c-.781-.5-1.783-.5-2.564 0L3.63 9.506l7.071 4.62c.79.515 1.809.515 2.598 0l7.07-4.62-7.087-4.544Z"
+                />
+            </svg>
+        </span>
+
+        <h3>Aprendices totales</h3>
+
+        <strong>
+            {{ row.get('apprentices_statistics') | int }}
+        </strong>
+
+        <small class="muted">
+            Listado: {{ apprentices_list|length }}
+        </small>
+    </article>
+
+    {# Habilitados #}
+
+    <article class="stat-card" role="figure" aria-label="Habilitados">
+        <span class="stat-icon">✓</span>
+        <h3>Habilitados</h3>
+        <strong>{{ row.get('apprentices_enabled') | int }}</strong>
+    </article>
+
+    {# Con alternativa #}
+
+    <article class="stat-card" role="figure" aria-label="Con alternativa">
+        <span class="stat-icon">↻</span>
+        <h3>Con alternativa</h3>
+        <strong>{{ row.get('learning_contract') | int }}</strong>
+    </article>
+
+    {# Sin alternativa #}
+
+    <article class="stat-card" role="figure" aria-label="Sin alternativa">
+        <span class="stat-icon">×</span>
+        <h3>Sin alternativa</h3>
+        <strong>{{ row.get('apprentices_without_alternative') | int }}</strong>
+    </article>
+
+    {# Certificados #}
+
+    <article class="stat-card" role="figure" aria-label="Certificados">
+        <span class="stat-icon">✓</span>
+        <h3>Certificados</h3>
+        <strong>{{ row.get('apprentices_certified') | int }}</strong>
+    </article>
+
+</section>
+
+{# ---------------------------------------------------------
+Modalidades de etapa productiva
+--------------------------------------------------------- #}
+
+<section
+    class="panel metric-panel"
+    aria-label="Modalidades de etapa productiva"
+>
+
+    <h3>Modalidades de etapa productiva</h3>
+
+    {% set total = total_apprentices if total_apprentices else 0 %}
+
+    {# Los conteos vienen directamente de compute_group_stats().
+       El template no vuelve a calcularlos. #}
+
+    {% set cnt_contrato = row.get('contrato_aprendizaje', 0) | int %}
+    {% set cnt_vinculo_form = row.get('contrato_vinculo_formativo', 0) | int %}
+    {% set cnt_practicas = row.get('practicas_economia_popular', 0) | int %}
+    {% set cnt_proyecto = row.get('proyecto_productivo', 0) | int %}
+    {% set cnt_vinculo_laboral = row.get('vinculo_laboral', 0) | int %}
+    {% set cnt_monitoria = row.get('monitoria', 0) | int %}
+
+    {% set pct_contrato =
+        ((cnt_contrato / total) * 100) | round(0)
+        if total > 0 else 0
+    %}
+
+    {% set pct_vinculo_form =
+        ((cnt_vinculo_form / total) * 100) | round(0)
+        if total > 0 else 0
+    %}
+
+    {% set pct_practicas =
+        ((cnt_practicas / total) * 100) | round(0)
+        if total > 0 else 0
+    %}
+
+    {% set pct_proyecto =
+        ((cnt_proyecto / total) * 100) | round(0)
+        if total > 0 else 0
+    %}
+
+    {% set pct_vinculo_laboral =
+        ((cnt_vinculo_laboral / total) * 100) | round(0)
+        if total > 0 else 0
+    %}
+
+    {% set pct_monitoria =
+        ((cnt_monitoria / total) * 100) | round(0)
+        if total > 0 else 0
+    %}
+
+    <div class="progress-list progress-list--two">
+
+        <div>
+            <span>Contrato de aprendizaje</span>
+            <meter
+                min="0"
+                max="100"
+                value="{{ pct_contrato }}"
+                aria-label="Porcentaje contrato de aprendizaje"
+            ></meter>
+            <strong>{{ cnt_contrato }}</strong>
+        </div>
+
+        <div>
+            <span>Prácticas en la economía popular y/o campesina</span>
+            <meter
+                min="0"
+                max="100"
+                value="{{ pct_practicas }}"
+                aria-label="Porcentaje prácticas EP"
+            ></meter>
+            <strong>{{ cnt_practicas }}</strong>
+        </div>
+
+        <div>
+            <span>Contrato de vínculo formativo</span>
+            <meter
+                min="0"
+                max="100"
+                value="{{ pct_vinculo_form }}"
+                aria-label="Porcentaje contrato vínculo formativo"
+            ></meter>
+            <strong>{{ cnt_vinculo_form }}</strong>
+        </div>
+
+        <div>
+            <span>Proyecto productivo</span>
+            <meter
+                min="0"
+                max="100"
+                value="{{ pct_proyecto }}"
+                aria-label="Porcentaje proyecto productivo"
+            ></meter>
+            <strong>{{ cnt_proyecto }}</strong>
+        </div>
+
+        <div>
+            <span>Monitoría</span>
+            <meter
+                min="0"
+                max="100"
+                value="{{ pct_monitoria }}"
+                aria-label="Porcentaje monitoría"
+            ></meter>
+            <strong>{{ cnt_monitoria }}</strong>
+        </div>
+
+        <div>
+            <span>Vínculo laboral</span>
+            <meter
+                min="0"
+                max="100"
+                value="{{ pct_vinculo_laboral }}"
+                aria-label="Porcentaje vínculo laboral"
+            ></meter>
+            <strong>{{ cnt_vinculo_laboral }}</strong>
+        </div>
+
+    </div>
+
+</section>
+
+{# ---------------------------------------------------------
+Panel: Seguimiento de la etapa productiva
+--------------------------------------------------------- #}
+<section class="info-card-apprendice-evidence" aria-label="Seguimiento de la etapa productiva">
+  <h2>Seguimiento de la etapa productiva</h2>
+  {% set fr = followup_rows if followup_rows is defined else [] %}
+  {% if fr %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Aprendiz</th><th>Estado general</th><th>Próximo momento</th><th>Rango</th><th>Acción</th></tr></thead>
+      <tbody>
+      {% for row in fr %}
+        {% set nxt = row.next_followup %}
+        <tr>
+          <td>{{ row.apprentice.full_name or (row.apprentice.first_names ~ ' ' ~ row.apprentice.last_names) }}</td>
+          <td><span class="status-pill">{{ row.status_label }}</span></td>
+          <td>{{ nxt.label if nxt else 'Sin pendiente' }}</td>
+          <td>{% if nxt and nxt.start and nxt.end %}{{ nxt.start|date_dmY }} al {{ nxt.end|date_dmY }}{% else %}—{% endif %}</td>
+          <td><a class="ghost-btn" href="{{ url_for('apprentices.detail', id=row.apprentice.id) }}">Ver seguimiento</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty-state">No hay aprendices con información de seguimiento.</p>{% endif %}
+</section>
+
+{# ---------------------------------------------------------
+Panel: Aprendices del grupo (tabla)
+--------------------------------------------------------- #}
+
+<article class="info-card-apprendice-evidence">
+
+    <h2>
+
+        <span class="info-card__icon" aria-hidden="true">
+
+            <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-label="Graduación"
+            >
+                <path
+                    d="M9.909 3.7a3.875 3.875 0 0 1 4.182 0l8.064 5.169a.75.75 0 0 1 .005 1.259L19 12.193v5.557a.75.75 0 0 1-.15.45l-.001.001-.001.002-.003.004-.009.004-.015.02a7.428 7.428 0 0 1-1.662 1.401C16.036 20.33 14.339 21 12 21s-4.036-.67-5.159-1.361a7.427 7.427 0 0 1-1.25-.957 5.317 5.317 0 0 1-.316-.33 2.719 2.719 0 0 1-.124-.15L5.15 18.2a.75.75 0 0 1-.15-.45v-5.557l-2-1.307v5.364a.75.75 0 0 1-1.5 0V9.5a.75.75 0 0 1 .358-.64l8.05-5.16Zm4.21 11.681a3.875 3.875 0 0 1-4.238 0L6.5 13.172v4.297a5.934 5.934 0 0 0 1.127.893C8.536 18.92 9.964 19.5 12 19.5s3.464-.58 4.373-1.139a5.935 5.935 0 0 0 1.127-.892v-4.297l-3.38 2.21Zm-.837-10.419c-.781-.5-1.783-.5-2.564 0L3.63 9.506l7.071 4.62c.79.515 1.809.515 2.598 0l7.07-4.62-7.087-4.544Z"
+                />
+            </svg>
+
+        </span>
+
+        Aprendices del grupo
+
+    </h2>
+
+</article>
+
+<section class="table-card">
+
+    {% set apprentices_list = apprentices if apprentices is defined else [] %}
+
+    {% if _user and _user.role == 'SUPPORT' %}
+
+    <form
+        id="bulk-apprentices-group-{{ record.id }}"
+        method="post"
+        action="{{ url_for('apprentices.bulk_delete') }}"
+        data-bulk-form
+        class="bulk-selection"
+    >
+
+        {% if csrf_token is defined %}
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="{{ csrf_token() }}"
+        >
+        {% endif %}
+
+        <div class="bulk-bar bulk-bar--top">
+
+            <label class="select-all-pill">
+
+                <input
+                    type="checkbox"
+                    data-select-all
+                >
+
+                <span data-select-count>
+                    Seleccionar todo
+                </span>
+
+            </label>
+
+            <div class="toolbar__actions">
+
+                <button
+                    type="button"
+                    class="ghost-btn"
+                    data-disable-bulk="apprentices-management"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="submit"
+                    class="danger-btn"
+                    onclick="return confirm('Eliminar los aprendices seleccionados? Esta accion no se puede deshacer.');"
+                >
+                    Eliminar seleccionados
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+    {% endif %}
+
+    <div class="table-wrap">
+
+        <table
+            class="data-table"
+            aria-describedby="Aprendices del grupo"
+        >
+
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre del aprendiz</th>
+                    <th>Grupo</th>
+                    <th>Programa</th>
+                    <th>Nivel</th>
+                    <th>Modalidad EP</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% if apprentices_list %}
+
+                    {% for apprentice in apprentices_list %}
+
+                    <tr
+                        class="clickable-row"
+                        data-href="{{ url_for('apprentices.detail', id=apprentice.id) }}"
+                        tabindex="0"
+                    >
+
+                        <td>
+                            {{ apprentice.document_number or '-' }}<br>
+                            <small>
+                                {{ apprentice.document_type or '' }}
+                            </small>
+                        </td>
+
+                        <td>
+                            {{ apprentice.full_name or (apprentice.first_names ~ ' ' ~ apprentice.last_names) }}<br>
+                            <small>
+                                {{ apprentice.email or 'Sin correo' }}
+                            </small>
+                        </td>
+
+                        <td>
+
+                            {% if apprentice.group %}
+
+                            <a
+                                href="{{ url_for('groups.detail', id=apprentice.group.id) }}"
+                            >
+                                {{ apprentice.group.group_number }}
+                            </a>
+
+                            {% else %}
+
+                            {{ apprentice.group_number or '-' }}
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ apprentice.program_name or '-' }}
+                        </td>
+
+                        <td>
+                            {{ apprentice.program_level_label or '-' }}
+                        </td>
+
+                        <td>
+                            {{ apprentice.ep_modality_label or 'Sin definir' }}
+                        </td>
+
+                        <td>
+                            {{ apprentice.sofia_status_label or 'Sin estado' }}
+                        </td>
+
+                        <td class="actions-cell">
+
+                            {% set can_edit =
+                                (_user and _user.role in ['FOLLOW_UP_INSTRUCTOR', 'SUPPORT'])
+                                or
+                                (
+                                    _user
+                                    and _user.role == 'APPRENTICE'
+                                    and apprentice.student_user_id == _user.id
+                                )
+                            %}
+
+                            {% if can_edit and has_endpoint('apprentices.edit') %}
+
+                            <a
+                                class="icon-action icon-action--edit"
+                                aria-label="Editar aprendiz"
+                                title="Editar aprendiz"
+                                href="{{ url_for('apprentices.edit', id=apprentice.id) }}"
+                            >
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    aria-hidden="true"
+                                    focusable="false"
+                                >
+                                    <path
+                                        d="M21.03 2.97a3.578 3.578 0 0 1 0 5.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L15.97 2.97a3.578 3.578 0 0 1 5.06 0ZM15 6.06 5.062 16a.75.75 0 0 0-.193.333l-1.05 3.85 3.85-1.05A.75.75 0 0 0 8 18.938L17.94 9 15 6.06Zm2.03-2.03-.97.97L19 7.94l.97-.97a2.079 2.079 0 0 0-2.94-2.94Z"
+                                        fill="currentColor"
+                                    />
+                                </svg>
+
+                            </a>
+
+                            {% endif %}
+
+                            {% if _user and _user.role in ['FOLLOW_UP_INSTRUCTOR', 'SUPPORT'] and has_endpoint('apprentices.delete') %}
+
+                            <form
+                                method="post"
+                                action="{{ url_for('apprentices.delete', id=apprentice.id) }}"
+                                onsubmit="return confirm('Eliminar este aprendiz?');"
+                                style="display:inline"
+                            >
+
+                                {% if csrf_token is defined %}
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="{{ csrf_token() }}"
+                                >
+                                {% endif %}
+
+                                <button
+                                    type="submit"
+                                    class="icon-action icon-action--delete"
+                                    aria-label="Eliminar aprendiz"
+                                    title="Eliminar aprendiz"
+                                >
+
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        aria-hidden="true"
+                                        focusable="false"
+                                    >
+                                        <path
+                                            d="M12 1.75a3.25 3.25 0 0 1 3.245 3.066L15.25 5h5.25a.75.75 0 0 1 .102 1.493L20.5 6.5h-.796l-1.28 13.02a2.75 2.75 0 0 1-2.561 2.474l-.176.006H8.313a2.75 2.75 0 0 1-2.714-2.307l-.023-.174L4.295 6.5H3.5a.75.75 0 0 1-.743-.648L2.75 5.75a.75.75 0 0 1 .648-.743L3.5 5h5.25A3.25 3.25 0 0 1 12 1.75Zm6.197 4.75H5.802l1.267 12.872a1.25 1.25 0 0 0 1.117 1.122l.127.006h7.374c.6 0 1.109-.425 1.225-1.002l.02-.126L18.196 6.5ZM13.75 9.25a.75.75 0 0 1 .743.648L14.5 10v7a.75.75 0 0 1-1.493.102L13 17v-7a.75.75 0 0 1-.75-.75Zm-3.5 0a.75.75 0 0 1 .743.648L11 10v7a.75.75 0 0 1-1.493.102L9.5 17v-7a.75.75 0 0 1 .75-.75Zm1.75-6a1.75 1.75 0 0 0-1.744 1.606L10.25 5h3.5A1.75 1.75 0 0 0 12 3.25Z"
+                                            fill="currentColor"
+                                        />
+                                    </svg>
+
+                                </button>
+
+                            </form>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+                        <td
+                            colspan="9"
+                            class="empty-state"
+                        >
+                            No hay aprendices vinculados a este grupo.
+                        </td>
+                    </tr>
+
+                {% endif %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{# JavaScript: hace clicable la fila, pero respeta enlaces, botones y formularios dentro de la fila #}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const rows = document.querySelectorAll(
+        'tr.clickable-row[data-href]'
+    );
+
+    rows.forEach(function (tr) {
+
+        // Click con ratón
+        tr.addEventListener('click', function (ev) {
+
+            // Si el click vino desde un enlace, botón o dentro de un form,
+            // no navegamos.
+            if (
+                ev.target.closest(
+                    'a, button, form, input, textarea, select'
+                )
+            ) {
+                return;
+            }
+
+            const href = tr.dataset.href;
+
+            if (!href) {
+                return;
+            }
+
+            // Navegación normal (mantiene historial)
+            window.location.href = href;
+        });
+
+        // Soporte teclado: Enter o Space activan la navegación
+        tr.addEventListener('keydown', function (ev) {
+
+            if (ev.key === 'Enter' || ev.key === ' ') {
+
+                // Evitar scroll por espacio
+                ev.preventDefault();
+
+                // Si el foco está en un control interactivo,
+                // no navegamos.
+                if (
+                    document.activeElement &&
+                    document.activeElement.closest &&
+                    document.activeElement.closest(
+                        'a, button, input, textarea, select, form'
+                    )
+                ) {
+                    return;
+                }
+
+                const href = tr.dataset.href;
+
+                if (href) {
+                    window.location.href = href;
+                }
+            }
+
+        });
+
+    });
+
+});
+</script>
+
+{% endblock %}

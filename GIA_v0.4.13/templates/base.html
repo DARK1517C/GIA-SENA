@@ -1,0 +1,466 @@
+<!-- templates/base.html -->
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}GIA{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/utilities.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/apprentices.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+  {# Defensive context values to avoid None errors in templates #}
+  {% set _endpoint = (request.endpoint or '') %}
+  {% set _user = current_user if current_user is not none else None %}
+  {% set _role_labels = role_labels if role_labels is defined else {} %}
+
+  {% if _user and _user.is_authenticated %}
+  <header class="topbar">
+    <img class="brand-logo" src="{{ url_for('static', filename='img/logo-gia.svg') }}" alt="logo-gia">
+    <nav class="main-nav">
+      {% if _user.role != 'APPRENTICE' %}
+        <a class="{% if request.endpoint == 'dashboard' or request.endpoint == 'dashboard.index' %}active{% endif %}"
+           href="{{ url_for('dashboard.index') }}">Estadísticas</a>
+
+        <a class="{% if 'apprentice' in request.endpoint or request.endpoint.startswith('apprentices') %}active{% endif %}"
+           href="{{ url_for('apprentices.index') }}">Aprendices</a>
+
+        <a class="{% if 'group' in request.endpoint or request.endpoint.startswith('groups') %}active{% endif %}"
+           href="{{ url_for('groups.index') }}">Grupos</a>
+      {% endif %}
+
+      {% if current_user.role in ['FOLLOW_UP_INSTRUCTOR', 'LEAD_FOLLOW_UP_INSTRUCTOR', 'SUPPORT'] %}
+        <a class="{% if request.endpoint.startswith('evidence_admin') %}active{% endif %}"
+           href="{{ url_for('evidence_admin.index') }}">Administrar evidencias</a>
+      {% endif %}
+
+      {% if current_user.role in ['CERTIFIER', 'SUPPORT'] %}
+        <a class="{% if request.endpoint.startswith('certification') %}active{% endif %}"
+           href="{{ url_for('certification.index') }}">Certificación</a>
+      {% endif %}
+
+      {% if current_user.is_support %}
+        <a class="{% if request.endpoint.startswith('users') %}active{% endif %}"
+           href="{{ url_for('users.index') }}">Usuarios</a>
+      {% endif %}
+    </nav>
+
+    <div class="topbar-actions">
+      <div class="notification-menu">
+        <details>
+          <summary class="notification-trigger" aria-label="Abrir notificaciones">
+            <span class="notification-trigger__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 21h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+            </span>
+            {% if unread_notification_count %}
+              <span class="notification-trigger__badge">{{ unread_notification_count if unread_notification_count < 100 else '99+' }}</span>
+            {% endif %}
+          </summary>
+
+          <div class="notification-popover">
+            <div class="notification-popover__header">
+              <strong>Notificaciones</strong>
+              <a href="{{ url_for('notifications.index') }}">Ver todas</a>
+            </div>
+
+            {% if recent_notifications %}
+              {% set unread_recent = recent_notifications | selectattr('is_read', 'equalto', false) | list %}
+              {% if unread_recent %}<div class="notification-popover__section-title">Importantes</div>{% endif %}
+              <div class="notification-popover__list">
+                {% for notification in recent_notifications %}
+                  <a class="notification-popover__item{% if not notification.is_read %} notification-popover__item--unread{% endif %}"
+                     href="{{ url_for('notifications.open_notification', notification_id=notification.id) }}">
+                    <span class="notification-popover__dot" aria-hidden="true"></span>
+                    <span class="notification-popover__body">
+                      <strong>{{ notification.title }}</strong>
+                      <span>{{ notification.message }}</span>
+                      <small>{{ format_datetime_local(notification.created_at) }}</small>
+                    </span>
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="notification-popover__empty">No tienes notificaciones nuevas.</div>
+            {% endif %}
+
+            <div class="notification-popover__footer">
+              <a href="{{ url_for('notifications.index') }}">Abrir bandeja de notificaciones</a>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="user-menu">
+        <details>
+        <summary>
+          <span class="avatar nav-avatar"
+            {% if _user %}
+              data-name="{{ (_user.full_name or _user.login_identifier) | e }}"
+              aria-label="Avatar de {{ (_user.full_name or _user.login_identifier) | e }}"
+            {% endif %}>
+            {% if _user and _user.avatar_url %}
+              <img src="{{ _user.avatar_url }}" alt="Avatar de {{ (_user.full_name or _user.login_identifier) | e }}">
+            {% else %}
+              <span class="avatar__fallback avatar__fallback--nav" aria-hidden="true"></span>
+            {% endif %}
+          </span>
+        </summary>
+
+        <!-- Dropdown completo -->
+        <div class="user-menu__dropdown">
+          <div class="user-info">
+            <div class="user-details">
+              <strong>{{ _user.full_name if _user and _user.full_name else (_user.login_identifier if _user else '') }}</strong>
+              <small>{{ _role_labels.get(_user.role, _user.role|capitalize if _user and _user.role else '') }}</small>
+            </div>
+          </div>
+
+          <a href="{{ url_for('notifications.index') }}">
+            <span class="nav-icon">🔔</span>
+            Notificaciones{% if unread_notification_count %} ({{ unread_notification_count }}){% endif %}
+          </a>
+
+          <a href="{{ url_for('users.profile') }}">
+            <span class="nav-icon">
+              <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.754 14a2.249 2.249 0 0 1 2.25 2.249v.575c0 .894-.32 1.76-.902 2.438-1.57 1.834-3.957 2.739-7.102 2.739-3.146 0-5.532-.905-7.098-2.74a3.75 3.75 0 0 1-.898-2.435v-.577a2.249 2.249 0 0 1 2.249-2.25h11.501Zm0 1.5H6.253a.749.749 0 0 0-.75.749v.577c0 .536.192 1.054.54 1.461 1.253 1.468 3.219 2.214 5.957 2.214s4.706-.746 5.962-2.214a2.25 2.25 0 0 0 .541-1.463v-.575a.749.749 0 0 0-.749-.75ZM12 2.004a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" fill="#212121"/>
+              </svg>
+            </span>Mi perfil
+          </a>
+
+          <form method="post" action="{{ url_for('auth.logout') }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="danger-link" type="submit">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+        <path d="M8.502 11.5a1.002 1.002 0 1 1 0 2.004 1.002 1.002 0 0 1 0-2.004Z" fill="currentColor"/>
+        <path d="M12 4.354v6.651l7.442-.001L17.72 9.28a.75.75 0 0 1-.073-.976l.073-.084a.75.75 0 0 1 .976-.073l.084.073 2.997 2.997a.75.75 0 0 1 .073.976l-.073.084-2.996 3.004a.75.75 0 0 1-1.134-.975l.072-.085 1.713-1.717-7.431.001L12 19.25a.75.75 0 0 1-.88.739l-8.5-1.502A.75.75 0 0 1 2 17.75V5.75a.75.75 0 0 1 .628-.74l8.5-1.396a.75.75 0 0 1 .872.74Zm-1.5.883-7 1.15V17.12l7 1.236V5.237Z" fill="currentColor"/>
+        <path d="M13 18.501h.765l.102-.006a.75.75 0 0 0 .648-.745l-.007-4.25H13v5.001ZM13.002 10 13 8.725V5h.745a.75.75 0 0 1 .743.647l.007.102.007 4.251h-1.5Z" fill="currentColor"/>
+      </svg>
+          </button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="app-shell">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <section class="flash-stack" aria-live="polite">
+          {% for category, message in messages %}
+            <article class="flash flash--{{ category }}">{{ message }}</article>
+          {% endfor %}
+        </section>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if current_user.is_authenticated %}
+    <footer class="app-footer"></footer>
+  {% endif %}
+
+  {% if _user and _user.is_authenticated %}
+  {% endif %}
+
+<script>
+(function () {
+  'use strict';
+
+  /* -------------------------
+     Helpers
+     ------------------------- */
+  function $id(id) { return document.getElementById(id); }
+  function $all(selector, root) { root = root || document; try { return Array.from(root.querySelectorAll(selector)); } catch (e) { return []; } }
+  function safe(fn){ try{ fn(); }catch(e){ console.debug('safe error', e); } }
+
+  /* -------------------------
+     Common UI helpers (bulk selection, avatar initials, file inputs)
+     These are defensive: they won't throw if elements are missing.
+     ------------------------- */
+  safe(function(){
+    // Bulk selection
+    document.querySelectorAll("[data-bulk-form]").forEach(function(form){
+      try {
+        var itemSelector = 'input[data-select-item][form="' + form.id + '"]';
+        var items = Array.from(document.querySelectorAll(itemSelector));
+        var panel = form.closest("section") || document;
+        var toggles = Array.from(panel.querySelectorAll("[data-select-all]"));
+        var counters = Array.from(panel.querySelectorAll("[data-select-count]"));
+
+        var syncSelectionState = function(){
+          var selectedCount = items.filter(function(entry){ return entry.checked; }).length;
+          var allChecked = items.length > 0 && selectedCount === items.length;
+          toggles.forEach(function(toggle){ toggle.checked = allChecked; });
+          counters.forEach(function(counter){ counter.textContent = selectedCount ? (selectedCount + " seleccionados") : "Seleccionar todo"; });
+        };
+
+        toggles.forEach(function(toggle){
+          toggle.addEventListener("change", function(){
+            items.forEach(function(item){ item.checked = toggle.checked; });
+            syncSelectionState();
+          });
+        });
+
+        items.forEach(function(item){ item.addEventListener("change", syncSelectionState); });
+        syncSelectionState();
+      } catch(e){}
+    });
+
+    // Avatar initials (defensive)
+    document.querySelectorAll('.avatar').forEach(function (el) {
+      try {
+        if (el.querySelector('img')) return;
+        var name = el.getAttribute('data-name') || '';
+        var key = (name || 'anon').toLowerCase().trim();
+        var COLORS = ['#cfffb8','#b8ffd5','#b8e4ff','#baf5fd','#ffeeb8','#eac9ee','#f2c5c6','#ffd5b8'];
+        var idx = Math.abs(key.split('').reduce(function(h,c){ return (h<<5)-h + c.charCodeAt(0); },0)) % COLORS.length;
+        var bg = COLORS[idx];
+        var fg = (function(hex){
+          var c = hex.replace('#','');
+          var r = parseInt(c.substr(0,2),16), g = parseInt(c.substr(2,2),16), b = parseInt(c.substr(4,2),16);
+          var lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+          return lum > 0.6 ? '#222' : '#fff';
+        })(bg);
+        var fallback = el.querySelector('.avatar__fallback');
+        var m = (name || '').trim().match(/\p{L}/u);
+        var letter = m ? m[0].toUpperCase() : (name || '').trim().charAt(0).toUpperCase();
+        if (fallback) fallback.textContent = letter;
+        else el.textContent = letter;
+        el.style.backgroundColor = bg;
+        el.style.color = fg;
+      } catch(e){}
+    });
+
+    // File import labels
+    document.querySelectorAll(".file-import-form").forEach(function(form){
+      try {
+        var input = form.querySelector(".file-import-input");
+        var label = form.querySelector("[data-file-name]");
+        if (!input || !label || input.dataset.fileImportBound) return;
+        input.dataset.fileImportBound = "1";
+        input.addEventListener("change", function(){
+          label.textContent = input.files && input.files.length ? input.files[0].name : "Ningun archivo seleccionado";
+        });
+      } catch(e){}
+    });
+  });
+
+  /* -------------------------
+     Evidence collapsible module
+     - Accessible headers (role=button, tabindex)
+     - Click and keyboard handlers
+     - Idempotent: safe to call multiple times
+     ------------------------- */
+  (function evidenceCollapsibleModule() {
+    function setCardOpen(card, open) {
+      if (!card) return;
+      var head = card.querySelector('.evidence-card__head');
+      var body = card.querySelector('.evidence-card__body');
+      if (!head || !body) return;
+      if (open) {
+        body.hidden = false;
+        head.setAttribute('aria-expanded', 'true');
+        card.setAttribute('aria-open', 'true');
+      } else {
+        body.hidden = true;
+        head.setAttribute('aria-expanded', 'false');
+        card.removeAttribute('aria-open');
+      }
+    }
+
+    function toggleCard(card) {
+      if (!card) return;
+      var body = card.querySelector('.evidence-card__body');
+      if (!body) return;
+      setCardOpen(card, !!body.hidden);
+    }
+
+    function ensureHeaderAccessible(head) {
+      if (!head) return;
+      if (!head.hasAttribute('tabindex')) head.setAttribute('tabindex', '0');
+      if (!head.hasAttribute('role')) head.setAttribute('role', 'button');
+      if (!head.hasAttribute('aria-expanded')) head.setAttribute('aria-expanded', 'false');
+    }
+
+    function initCards(root) {
+      var cards = $all('.evidence-card', root);
+      cards.forEach(function (card) {
+        try {
+          var head = card.querySelector('.evidence-card__head');
+          var body = card.querySelector('.evidence-card__body');
+          if (!head || !body) return;
+
+          ensureHeaderAccessible(head);
+
+          if (typeof body.hidden === 'undefined') body.hidden = true;
+          head.setAttribute('aria-expanded', body.hidden ? 'false' : 'true');
+          if (!card.hasAttribute('aria-open') && !body.hidden) card.setAttribute('aria-open', 'true');
+
+          if (!head.dataset.evidenceBound) {
+            head.dataset.evidenceBound = '1';
+            head.addEventListener('click', function (ev) {
+              ev.preventDefault();
+              toggleCard(card);
+            });
+            head.addEventListener('keydown', function (ev) {
+              var key = ev.key || ev.keyCode;
+              if (key === 'Enter' || key === ' ' || key === 'Spacebar' || key === 13 || key === 32) {
+                ev.preventDefault();
+                toggleCard(card);
+              }
+            });
+          }
+        } catch (err) {
+          console.debug('evidence-card init error', err);
+        }
+      });
+    }
+
+    function delegateClicks() {
+      document.body.addEventListener('click', function (ev) {
+        var head = ev.target.closest && ev.target.closest('.evidence-card__head');
+        if (!head) return;
+        if (head.dataset.evidenceBound) return;
+        var card = head.closest('.evidence-card');
+        if (!card) return;
+        ev.preventDefault();
+        toggleCard(card);
+      }, true);
+    }
+
+    function init(root) {
+      try {
+        initCards(root || document);
+        delegateClicks();
+      } catch (e) {
+        console.error('evidence-collapsible init failed', e);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { init(document); });
+    } else {
+      init(document);
+    }
+
+    window.EvidenceCollapsible = {
+      init: init,
+      toggleCardById: function (cardId) {
+        var card = document.getElementById(cardId);
+        if (card) toggleCard(card);
+      },
+      openAll: function () { $all('.evidence-card').forEach(function(c){ setCardOpen(c, true); }); },
+      closeAll: function () { $all('.evidence-card').forEach(function(c){ setCardOpen(c, false); }); }
+    };
+  })();
+
+  /* -------------------------
+     Small global keyboard helper (Esc closes any open details)
+     ------------------------- */
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      // Close any open <details> elements used in user menu or similar
+      document.querySelectorAll('details[open]').forEach(function(d){ d.open = false; });
+    }
+  });
+
+})();
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  var openBtn = document.getElementById('openPdfModalBtn');
+  var modal = document.getElementById('pdfModal');
+  if (!modal) return;
+  var backdrop = modal.querySelector('.pdf-modal__backdrop');
+  var closeBtns = modal.querySelectorAll('[data-action="close"], .pdf-modal__close');
+  var iframe = document.getElementById('pdfModalIframe');
+  var toolBtns = modal.querySelectorAll('.tool-btn');
+  var lastFocused = null;
+  var scale = 1;
+  var rotation = 0;
+
+  function openModal() {
+    lastFocused = document.activeElement;
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    // reset transform
+    scale = 1; rotation = 0; applyTransform();
+    // focus en el primer control
+    var firstControl = modal.querySelector('.pdf-modal__close') || modal.querySelector('.tool-btn');
+    if (firstControl) firstControl.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
+
+  function applyTransform() {
+    if (!iframe) return;
+    iframe.style.transform = 'scale(' + scale + ') rotate(' + rotation + 'deg)';
+  }
+
+  if (openBtn) openBtn.addEventListener('click', openModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+  closeBtns.forEach(function(b){ b.addEventListener('click', closeModal); });
+
+  document.addEventListener('keydown', function(e){
+    if (!modal.classList.contains('is-open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); }
+    if (e.key === '+' || e.key === '=') { scale = Math.min(2.5, scale + 0.1); applyTransform(); }
+    if (e.key === '-') { scale = Math.max(0.5, scale - 0.1); applyTransform(); }
+  });
+
+  toolBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var action = btn.getAttribute('data-action');
+      if (action === 'zoom-in') { scale = Math.min(2.5, scale + 0.1); applyTransform(); }
+      if (action === 'zoom-out') { scale = Math.max(0.5, scale - 0.1); applyTransform(); }
+      if (action === 'rotate') { rotation = (rotation + 90) % 360; applyTransform(); }
+      if (action === 'print') {
+        var url = iframe && iframe.src;
+        if (url) {
+          var w = window.open(url, '_blank');
+          if (w) { w.focus(); w.print(); }
+          else alert('Permite ventanas emergentes para imprimir.');
+        }
+      }
+    });
+  });
+});
+
+
+</script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+

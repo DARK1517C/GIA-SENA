@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if editing %}Editar ficha{% else %}Crear ficha{% endif %} | GIA
+{% endblock %}
+
+{% block content %}
+
+<section class="page-head">
+  <div>
+    <h1>{% if editing %}Editar ficha{% else %}Crear ficha{% endif %}</h1>
+    <p>
+      {% if editing %}
+        Modifica los datos principales de la ficha.
+      {% else %}
+        Crea una ficha y deja lista su información de seguimiento.
+      {% endif %}
+    </p>
+  </div>
+</section>
+
+{% if editing and group is defined %}
+  {% set form_action = url_for('groups.edit', id=group.id) %}
+{% else %}
+  {% set form_action = url_for('groups.create') %}
+{% endif %}
+
+<form method="post" action="{{ form_action }}" class="record-form">
+
+  {% if csrf_token is defined %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% endif %}
+
+  {# ============================================================
+     DATOS DE LA FICHA
+     ============================================================ #}
+
+  <section class="form-card">
+
+    <div class="form-card__header">
+      <h2>Datos de la ficha</h2>
+      <p>Identificación, programa y ubicación.</p>
+    </div>
+
+    <div class="form-two-columns">
+
+      <label>
+        Número de ficha
+        <input
+          name="group_number"
+          type="text"
+          value="{{ form.group_number if form is defined and form.group_number is defined else (group.group_number if group is defined and group.group_number else '') }}"
+          required
+        >
+      </label>
+
+      <label>
+        Nombre del programa
+        <input
+          name="program_name"
+          type="text"
+          value="{{ form.program_name if form is defined and form.program_name is defined else (group.program_name if group is defined and group.program_name else '') }}"
+          required
+        >
+      </label>
+
+      <label>
+        Nivel
+        <select name="program_level">
+          <option value="">Seleccionar nivel</option>
+
+          {% for option in program_levels %}
+            {% set option_value = option.value if option.value is defined else option %}
+            <option
+              value="{{ option_value }}"
+              {% if (form.program_level if form is defined and form.program_level is defined else (group.program_level if group is defined else '')) == option_value %}
+                selected
+              {% endif %}
+            >
+              {{ option.label if option.label is defined else option_value }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Modalidad
+        <select name="modality">
+          <option value="">Seleccionar modalidad</option>
+
+          {% for option in modalities %}
+            {% set option_value = option.value if option.value is defined else option %}
+            <option
+              value="{{ option_value }}"
+              {% if (form.modality if form is defined and form.modality is defined else (group.modality if group is defined else '')) == option_value %}
+                selected
+              {% endif %}
+            >
+              {{ option.label if option.label is defined else option_value }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Municipio
+        <select name="municipality">
+          <option value="">Seleccionar municipio</option>
+
+          {% for option in municipalities %}
+            {% set option_value = option.value if option.value is defined else option %}
+            <option
+              value="{{ option_value }}"
+              {% if (form.municipality if form is defined and form.municipality is defined else (group.municipality if group is defined else '')) == option_value %}
+                selected
+              {% endif %}
+            >
+              {{ option.label if option.label is defined else option_value }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Vigencia
+        <input
+          name="group_validity"
+          type="text"
+          value="{{ form.group_validity if form is defined and form.group_validity is defined else (group.group_validity if group is defined and group.group_validity else '') }}"
+        >
+      </label>
+
+      <label>
+        Estado ficha Sofia Plus
+        <select name="sofia_group_status">
+          <option value="">Seleccionar estado</option>
+
+          {% for option in group_statuses %}
+            {% set option_value = option.value if option.value is defined else option %}
+            <option
+              value="{{ option_value }}"
+              {% if (form.sofia_group_status if form is defined and form.sofia_group_status is defined else (group.sofia_group_status if group is defined else '')) == option_value %}
+                selected
+              {% endif %}
+            >
+              {{ option.label if option.label is defined else option_value }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label>
+        Fecha inicio ficha
+        <input
+          name="group_start_date"
+          type="date"
+          value="{{ form.group_start_date if form is defined and form.group_start_date is defined else (group.group_start_date if group is defined and group.group_start_date else '') }}"
+        >
+      </label>
+
+      <label>
+        Fecha fin formación
+        <input
+          name="training_end_date"
+          type="date"
+          value="{{ form.training_end_date if form is defined and form.training_end_date is defined else (group.training_end_date if group is defined and group.training_end_date else '') }}"
+        >
+      </label>
+
+      <label>
+        Inicio etapa productiva
+        <input
+          name="ep_start_date"
+          type="date"
+          value="{{ form.ep_start_date if form is defined and form.ep_start_date is defined else (group.ep_start_date if group is defined and group.ep_start_date else '') }}"
+        >
+      </label>
+
+    </div>
+  </section>
+
+
+  {# ============================================================
+     INSTRUCTORES Y ESTADÍSTICAS
+     ============================================================ #}
+
+  <section class="form-card">
+
+    <div class="form-card__header">
+      <h2>Instructores y estadísticas</h2>
+      <p>Responsables de la ficha y conteos principales.</p>
+    </div>
+
+    <div class="form-two-columns">
+
+      <label>
+        Instructor líder
+        <input
+          name="lead_instructor"
+          type="text"
+          value="{{ form.lead_instructor if form is defined and form.lead_instructor is defined else (group.lead_instructor if group is defined and group.lead_instructor else '') }}"
+        >
+      </label>
+
+      <label>
+        Instructor etapa productiva
+        <input
+          name="followup_instructor"
+          type="text"
+          value="{{ form.followup_instructor if form is defined and form.followup_instructor is defined else (group.followup_instructor if group is defined and group.followup_instructor else '') }}"
+        >
+      </label>
+
+      <label>
+        Aprendices habilitados
+        <input
+          name="apprentices_enabled"
+          type="text"
+          value="{{ form.apprentices_enabled if form is defined and form.apprentices_enabled is defined else (group.apprentices_enabled if group is defined and group.apprentices_enabled else '') }}"
+        >
+      </label>
+
+      <label>
+        Aprendices certificados
+        <input
+          name="apprentices_certified"
+          type="text"
+          value="{{ form.apprentices_certified if form is defined and form.apprentices_certified is defined else (group.apprentices_certified if group is defined and group.apprentices_certified else '') }}"
+        >
+      </label>
+
+    </div>
+  </section>
+
+
+  {# ============================================================
+     ACCIONES
+     ============================================================ #}
+
+  <div class="form-actions record-form__actions">
+
+    <button type="submit" class="primary-btn">
+      {% if editing %}
+        Guardar cambios
+      {% else %}
+        Crear ficha
+      {% endif %}
+    </button>
+
+    <a class="ghost-btn" href="{{ url_for('groups.index') }}">
+      Cancelar
+    </a>
+
+  </div>
+
+</form>
+
+{% endblock %}

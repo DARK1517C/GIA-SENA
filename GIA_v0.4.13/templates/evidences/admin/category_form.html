@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% set editing = category is not none %}
+{% block title %}{{ 'Editar' if editing else 'Nueva' }} categoría | GIA{% endblock %}
+{% block content %}
+<div class="page-header"><div><h1>{{ 'Editar categoría' if editing else 'Nueva categoría' }}</h1><p class="muted">Categoría institucional del dominio de evidencias.</p></div><a class="ghost-btn" href="{{ url_for('evidence_admin.index') }}">Cancelar</a></div>
+<article class="info-card">
+<form method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label for="code">Código</label><input id="code" name="code" required value="{{ category.code if editing else request.form.get('code','') }}">
+<label for="name">Nombre</label><input id="name" name="name" required value="{{ category.name if editing else request.form.get('name','') }}">
+<label for="description">Descripción</label><textarea id="description" name="description" rows="4">{{ category.description if editing else request.form.get('description','') }}</textarea>
+<label for="icon">Icono</label><input id="icon" name="icon" value="{{ category.icon if editing else request.form.get('icon','document') }}">
+<label for="color">Color</label><input id="color" name="color" type="text" placeholder="#39a900" value="{{ category.color if editing else request.form.get('color','') }}">
+<label for="sort_order">Orden</label><input id="sort_order" name="sort_order" type="number" min="0" value="{{ category.sort_order if editing else request.form.get('sort_order','0') }}">
+<label><input type="checkbox" name="is_active" {% if not editing or category.is_active %}checked{% endif %}> Activa</label>
+<div class="form-actions"><button class="primary-btn" type="submit">Guardar categoría</button></div>
+</form></article>
+{% endblock %}

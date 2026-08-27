@@ -1,0 +1,859 @@
+/* =========================================================
+   SISTEMA DE ESTILOS
+   Contiene: botones, iconos, paneles, importación de archivos,
+   barras bulk, tarjetas de estadísticas, grids, listas y utilidades.
+   ========================================================= */
+
+/* ===========================
+   BOTONES PRINCIPALES
+   =========================== */
+
+/* Botón primario (verde) */
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green);
+  padding: 8px 12px;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+.primary-btn:hover { background: var(--darkgreen); }
+
+/* Botón fantasma (borde gris, fondo transparente) */
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 4px 12px;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--space-xs);
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+.ghost-btn:hover { background: #f0f0f0; }
+
+/* Botón peligro (rojo) */
+.danger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--space-xs);
+  background: var(--danger);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.danger-btn:hover { background: var(--darkdanger); }
+
+/* Variante compacta del botón peligro */
+.danger-btn--compact {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+
+/* ===========================
+   BOTONES DE ICONO
+   =========================== */
+
+/* Contenedor sin fondo, solo el icono cambia de color */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: var(--space-xs);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+/* SVG hereda el color definido por la clase */
+.icon-btn svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+  fill: currentColor;
+  transition: color 180ms ease, transform 120ms ease;
+}
+
+/* Variante de edición (verde) */
+.icon-btn--edit svg { color: var(--green); }
+.icon-btn--edit:hover svg,
+.icon-btn--edit:focus svg { color: var(--darkgreen); }
+
+/* Variante de eliminación (rojo) */
+.icon-btn--danger svg { color: var(--danger); }
+.icon-btn--danger:hover svg,
+.icon-btn--danger:focus svg { color: var(--darkdanger); }
+
+/* Accesibilidad: focus visible */
+.icon-btn:focus-visible { outline: none; }
+.icon-btn:focus-visible svg { box-shadow: var(--shadow); }
+
+/* Variante de cerrar sesión (más grande) */
+.icon-btn--out-sesion svg {
+  color: var(--danger);
+  width: 40px;
+  height: 40px;
+}
+.icon-btn--out-sesion:hover svg,
+.icon-btn--out-sesion:focus svg { color: var(--darkdanger); }
+
+
+/* ===========================
+   MENÚ DE ACCIONES
+   =========================== */
+
+/* Contenedor de acciones en la página */
+.page-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Menú desplegable (details/summary) */
+.action-menu { position: relative; }
+
+/* Resumen del menú (botón cuadrado) */
+.action-menu summary {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--navy);
+  cursor: pointer;
+  list-style: none;
+  font-size: 14px;
+}
+.action-menu summary::-webkit-details-marker { display: none; }
+
+/* Estado abierto: resaltar borde */
+.action-menu[open] summary { border-color: var(--green); }
+
+/* Botones dentro del menú (posicionados) */
+.action-menu button {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  min-width: 190px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--space-xs);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  color: var(--danger);
+  font-weight: 700;
+  text-align: left;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+
+/* ===========================
+   PANELS Y LAYOUTS
+   =========================== */
+
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-md);
+}
+.panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+/* Toolbar general */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.toolbar__actions {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+
+
+/* ===========================
+   IMPORTACIÓN DE ARCHIVOS (file import)
+   =========================== */
+
+.file-import-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.file-import-form--panel { display: flex; }
+
+/* Input file oculto pero accesible */
+.file-import-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Selector visible (estilo borde verde) */
+.file-import-picker {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--green);
+  border-radius: var(--space-xs);
+  color: var(--green);
+  font-weight: 400;
+  cursor: pointer;
+}
+.file-import-picker:hover {
+  background: #f3fff0;
+  color: var(--darkgreen);
+  border-color: var(--darkgreen);
+}
+
+/* Nombre del archivo seleccionado (texto discreto) */
+.file-import-name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+
+/* ===========================
+   BULK BAR / SELECCIÓN MASIVA
+   =========================== */
+
+.bulk-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: #f9f9f9;
+  border-top: 1px solid #d9d9d9;
+  margin-top: var(--space-md);
+}
+
+.bulk-bar--top {
+  border: 1px solid #d9d9d9;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--surface);
+  margin: 0 0 var(--space-md);
+}
+
+.bulk-selection { display: none; padding: var(--space-md) var(--space-md) 0; }
+
+.management-list:not(.bulk-mode) .bulk-only { display: none; }
+.management-list.bulk-mode .bulk-selection { display: block; }
+.management-list.bulk-mode .bulk-only { display: table-cell; }
+.management-list.bulk-mode .group-card__check.bulk-only { display: inline-block; }
+
+/* Pill para seleccionar todo */
+.select-all-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* Celda de selección en tablas */
+.select-cell { width: 44px; text-align: center; }
+.select-cell input,
+.group-card__check,
+.select-all-pill input { width: 16px; height: 16px; accent-color: var(--green); }
+
+
+/* ===========================
+   STAT CARDS / DASHBOARD
+   =========================== */
+
+.stat-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: 24px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.stat-card:focus-within,
+.stat-card:focus { outline: 2px solid var(--cyan); outline-offset: 4px; }
+
+/* Grid para estadísticas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+/* Icono circular en stat card */
+.stat-icon {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 50px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--navy);
+  fill: currentColor;
+}
+
+/* Texto y valores */
+.stat-card h3 {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--colorneutral-6);
+  align-self: end;
+}
+.stat-card strong {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green);
+  align-self: start;
+}
+.stat-card small {
+  grid-column: 2;
+  grid-row: 3;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+  align-self: start;
+}
+
+
+/* ===========================
+   EVIDENCE / GROUP CARDS
+   =========================== */
+
+.evidence-grid { display: grid; gap: 16px; }
+
+.evidence-card {
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+/* Header clicable de la tarjeta */
+.evidence-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  cursor: pointer;
+  gap: 8px;
+}
+.evidence-card__head:focus { outline: 2px solid rgba(0,123,255,0.15); }
+
+.evidence-card__title { color: var(--colorneutral-6); font-size: 14px; }
+
+/* Body oculto por defecto */
+.evidence-card__body { padding: 16px; }
+
+/* Submission block */
+.submission-block { padding: 12px; }
+.submission-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .5rem;
+}
+.submission-header strong { color: var(--colorneutral-6); font-size: 14px; }
+.submission-header .muted { color: var(--colorneutral-5); font-size: 12px; }
+
+/* Lista de evidencias */
+.submission-evidence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 2px solid #f5f5f5;
+  padding-left: .75rem;
+}
+.evidence-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .35rem 0;
+  border-bottom: 1px dashed #f2f2f2;
+}
+.evidence-item a { color: var(--colorneutral-6); text-decoration: none; }
+.evidence-item a:hover { text-decoration: underline; }
+
+/* Status badges */
+.status {
+  padding: .15rem .5rem;
+  border-radius: 999px;
+  font-size: .8rem;
+  display: inline-block;
+}
+.status--approved { background: #e6f7ea; color: var(--colorgreen1); border: 1px solid #cfeed6; }
+.status--pending  { background: #fff4e6; color: #b36b00; border: 1px solid #ffe6b8; }
+.status--missing  { background: #f8f8f8; color: #666; border: 1px solid #eee; }
+
+/* Badges en encabezados */
+.badge { font-size: .85rem; margin-left: .5rem; padding: .2rem .5rem; border-radius: 999px; }
+.badge--approved { background: #e6f7ea; color: #1b7a3a; border: 1px solid #cfeed6; }
+.badge--pending  { background: #fff4e6; color: #b36b00; border: 1px solid #ffe6b8; }
+
+/* Chevron rotate cuando la tarjeta está abierta */
+.evidence-card .chev { transition: transform .25s ease; }
+.evidence-card[aria-open="true"] .chev { transform: rotate(180deg); }
+
+
+/* ===========================
+   METRICS / PROGRESS LISTS
+   =========================== */
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.metric-panel {
+  padding: var(--space-lg);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.metric-panel h3 {
+  margin: 0 0 var(--space-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.metric-panel p {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+}
+
+.progress-list { display: grid; gap: var(--space-md); }
+.progress-list div {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 1fr 40px;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.progress-list meter {
+  width: 100%;
+  height: 8px;
+  border-radius: 20px;
+}
+.progress-list meter::-webkit-meter-bar {
+  background: var(--colorneutral-2);
+  border-radius: 60px;
+}
+.progress-list meter::-webkit-meter-optimum-value {
+  background: var(--cyan);
+  border-radius: 60px;
+}
+.progress-list span { color: var(--colorneutral-5); font-weight: 400; font-size: 12px; }
+.progress-list strong { color: var(--green); font-weight: 600; font-size: 14px; }
+
+
+/* ===========================
+   BADGES (reutilizables)
+   =========================== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: 4px;
+  font-size: 12px;
+}
+.badge--blue { background: #e7f8ff; color: var(--navy); }
+.badge--violet { background: #f3e8ff; color: #71277a; }
+
+
+/* ===========================
+   GROUPS GRID Y CARDS
+   =========================== */
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: var(--space-lg);
+}
+
+.group-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  min-height: 160px;
+}
+
+/* Banner de la tarjeta */
+.group-card__banner {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.group-card__title {
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+}
+.group-card .meta {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* Body con columnas internas */
+.group-card__body {
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  color: var(--text);
+  font-size: 12px;
+}
+.group-card__body strong {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  margin: -4px 0 0;
+}
+
+/* Footer / acciones */
+.group-card__footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  background: var(--shadow);
+}
+.group-card__check { flex: 0 0 auto; margin-right: 4px; }
+
+/* Colores por nivel de programa */
+.group-card--auxiliar  .group-card__banner { background: #f7ecf9; }
+.group-card--tecnologo .group-card__banner { background: #e6f5ff; }
+.group-card--tecnico   .group-card__banner { background: #e6fff0; }
+.group-card--operario  .group-card__banner { background: #fff9e6; }
+
+
+.hero-card.group-card--auxiliar  { background-color: #f7ecf9; }
+.hero-card.group-card--tecnologo { background-color: #e6f5ff; }
+.hero-card.group-card--tecnico   { background-color: #e6fff0; }
+.hero-card.group-card--operario  { background-color: #fff9e6; }
+
+
+/* ===========================
+   INFO CARDS (DETALLE DE APRENDIZ)
+   =========================== */
+
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.detail-column { display: grid; gap: 16px; }
+
+.hero-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.hero-card h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+.hero-card p {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+  margin: -4px 0 0;
+}
+
+/* Back link */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--green);
+  text-decoration: none;
+  font-size: 16px;
+  margin-bottom: 24px;
+  padding-top: 24px;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+.back-link:hover { color: var(--darkgreen); }
+
+/* Tarjetas de información */
+.info-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* Tarjeta específica de evidencias del aprendiz */
+.info-card-apprendice-evidence {
+  margin-top: 32px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius);
+  padding: 24px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.info-card-apprendice-evidence h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* Icono dentro de la info-card */
+.info-card__icon {
+  display: inline-grid;
+  place-items: center;
+  color: var(--text);
+  background: transparent;
+  font-weight: 600;
+  margin-right: 0;
+  vertical-align: middle;
+}
+.info-card__icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  fill: currentColor;
+}
+
+/* Encabezado y cuerpo de info-card */
+.info-card h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+.info-card p {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+  margin: -14px 0 0 0;
+}
+.info-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+/* Definiciones (dl/dt/dd) */
+dl { margin: 0; display: grid; gap: 16px; }
+dt { font-size: 14px; line-height: 1.15; }
+dd {
+  margin: -14px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.15;
+}
+
+/* Banner colors for info-cards by level */
+.info-card--tecnologo .info-card__banner { background: #e6fff0; }
+.info-card--tecnico   .info-card__banner { background: #e6fbfe; }
+.info-card--operario  .info-card__banner { background: #f7ecf9; }
+
+
+/* ===========================
+   LISTAS Y COMPONENTES PEQUEÑOS
+   =========================== */
+
+.apprentice-list { list-style: none; padding: 0; margin: 0; }
+.apprentice-list li { padding: .35rem 0; border-bottom: 1px solid #f0f0f0; }
+
+.detail-list { display: grid; grid-template-columns: 160px 1fr; gap: .5rem 1rem; }
+.detail-list dt { font-weight: 700; color: var(--text); }
+.detail-list dd { margin: 0; color: var(--muted); }
+
+
+/* ===========================
+   UTILIDADES
+   =========================== */
+
+/* Screen-reader only */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
+
+
+/* ===========================
+   REGLAS RESPONSIVE (consolidadas)
+   =========================== */
+
+@media (max-width: 1024px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .groups-grid { grid-template-columns: 1fr; }
+  .analytics-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .info-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-card,
+  .group-card,
+  .info-card { padding: 16px; }
+  .stat-card h3 { font-size: 13px; }
+  .stat-card strong { font-size: 16px; }
+  .metric-panel { padding: var(--space-md); }
+}
+
+
+/* ===========================
+   AJUSTES VISUALES FINOS
+   =========================== */
+
+.group-card__title,
+.group-card .meta,
+.group-card .label { line-height: 1.1; }
+.info-card__title,
+.info-card__subtitle { line-height: 1; }
+
+/* Search wrapper: input + lupa */
+.search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-wrapper input#searchInput {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid var(--line, #dcdcdc);
+  border-radius: 6px;
+  min-width: 160px;
+}
+.search-wrapper button.search-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  border: 1px solid var(--line, #dcdcdc);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Contenedor de chips: horizontal, ocupa toda la fila del grid */
+.filters-grid .active-filters,
+#activeFilters {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Chip individual: inline-flex, no wrap interno */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  border: 1px solid #dbeafe;
+  cursor: pointer;
+  font-size: 12px;
+}
+.filter-chip .chip-text { display: inline-block; overflow: hidden; text-overflow: ellipsis; }
+.filter-chip .chip-close { margin-left: 6px; font-weight: 600; }
+
+/* Focus visible para chips */
+.filter-chip:focus { outline: 2px solid rgba(0, 112, 244, 0.25); outline-offset: 2px; }
+
+/* Responsive: apilar selects en pantallas pequeñas */
+@media (max-width: 900px) {
+  .filters-grid.filters-grid--four { grid-template-columns: 1fr; gap: 10px; }
+  .search-wrapper input#searchInput { min-width: 0; }
+}

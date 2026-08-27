@@ -1,0 +1,93 @@
+/* === TOPBAR === */
+.topbar {
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md); /* padding fijo en topbar */
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.app-shell {
+  padding: 0 78px; /* padding lateral amplio en escritorio */
+  padding-top: 70px; /* Ajuste para que el contenido no quede oculto detrás del nav */ /* igual a la altura del topbar */
+}
+
+/* Excepción: cuando es login, no aplicar app-shell */
+.login-body .app-shell {
+  all: unset;
+}
+
+/* === FOOTER === */
+.app-footer {
+  text-align: center;
+  padding: var(--radius-3);
+  font-size: 14px;
+  color: var(--text);
+  background: transparent;
+
+}
+
+/* === CABECERA DE PÁGINA === */
+.page-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: 28px;
+  padding-top: 28px; /* añade espacio entre nav y título */
+}
+
+.page-head h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--colorneutral-6);
+}
+
+.page-head p {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+  margin: -6px 0 0 0;
+}
+
+/* Variante con distribución horizontal */
+.page-head--split {
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* === RESPONSIVE === */
+
+/* Intermedio: tablets y pantallas medianas */
+@media (max-width: 1024px) and (min-width: 601px) {
+  .app-shell {
+    padding: 0 40px; /* reduce padding lateral */
+  }
+
+  .page-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-md); /* espacio más compacto */
+  }
+}
+
+/* Móvil: pantallas pequeñas */
+@media (max-width: 600px) {
+  .app-shell {
+    padding: 0 16px; /* padding mínimo en móviles */
+  }
+
+  .page-head {
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-top: var(--space-md); /* espacio más compacto en móviles */
+  }
+
+  .app-footer {
+    font-size: 12px;
+    padding: var(--space-sm);
+  }
+}

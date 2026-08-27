@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Importar aprendices | GIA{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div>
+    <h1>Importar aprendices</h1>
+    <p>Importa el libro oficial de GIA. La validación se realiza antes de aplicar cambios.</p>
+  </div>
+  <a class="ghost-btn" href="{{ url_for('apprentices.index') }}">Volver</a>
+</section>
+
+<section class="form-card">
+  <div class="form-card__header">
+    <h2>Archivo Excel</h2>
+    <p>Selecciona el archivo .xlsx oficial. No se aceptan otros formatos.</p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="record-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>
+      Libro Excel
+      <input type="file" name="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+    </label>
+    <div class="form-actions">
+      <button class="primary-btn" type="submit">Procesar importación</button>
+      <a class="ghost-btn" href="{{ url_for('apprentices.index') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

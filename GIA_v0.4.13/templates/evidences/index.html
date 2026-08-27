@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}Evidencias | GIA{% endblock %}
+
+{% block content %}
+
+<style>
+  /* =========================================================================
+     EVIDENCIAS — INDEX
+     Diseño alineado con la vista solicitada:
+     - 4 tarjetas superiores por categoría
+     - acordeones por categoría
+     - primera categoría abierta
+     - sin filtros, tablas ni estadísticas técnicas
+     ========================================================================= */
+
+  .evidences-page {
+    --ev-green: #39a900;
+    --ev-orange: #ff6b00;
+    --ev-cyan: #00a9c7;
+    --ev-pink: #e3267f;
+    --ev-text: #222222;
+    --ev-muted: #706f6e;
+    --ev-border: #d2d2d2;
+    --ev-bg: #f3f3f3;
+  }
+
+  /* -------------------------------------------------------------------------
+     TARJETAS SUPERIORES
+     ------------------------------------------------------------------------- */
+
+  .evidences-page .evidence-category-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .evidences-page .evidence-category-card {
+    min-height: 112px;
+    padding: 24px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, .08);
+  }
+
+  .evidences-page .evidence-category-icon {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: grid;
+    place-items: center;
+  }
+
+  .evidences-page .evidence-category-icon svg {
+    width: 42px;
+    height: 42px;
+    display: block;
+    fill: currentColor;
+    stroke: none;
+  }
+
+
+  .evidences-page .evidence-category-info {
+    min-width: 0;
+  }
+
+  .evidences-page .evidence-category-name {
+    margin: 0 0 6px;
+    color: var(--ev-text);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .evidences-page .evidence-category-progress {
+    margin: 0;
+    color: var(--ev-green);
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  /* -------------------------------------------------------------------------
+     ACORDEONES
+     ------------------------------------------------------------------------- */
+
+  .evidences-page .evidence-accordion {
+    margin-bottom: 18px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, .08);
+    overflow: hidden;
+  }
+
+  .evidences-page .evidence-accordion summary {
+    list-style: none;
+    cursor: pointer;
+    min-height: 78px;
+    padding: 0 26px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--ev-text);
+    font-size: 14px;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  .evidences-page .evidence-accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .evidences-page .evidence-accordion summary::before {
+    content: "";
+    width: 11px;
+    height: 11px;
+    flex: 0 0 11px;
+    border-right: 2px solid var(--ev-green);
+    border-bottom: 2px solid var(--ev-green);
+    transform: rotate(-45deg);
+    transition: transform .18s ease;
+    margin-right: 3px;
+  }
+
+  .evidences-page .evidence-accordion[open] summary::before {
+    transform: rotate(45deg);
+  }
+
+  .evidences-page .evidence-accordion[open] summary {
+    border-bottom: 1px solid var(--ev-border);
+  }
+
+
+  .evidences-page .evidence-items {
+    background: #fff;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .evidences-page .evidence-item {
+    min-height: 86px;
+    padding: 17px 28px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+
+    /* Las actividades son filas, no tarjetas individuales. */
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0;
+  }
+
+  /* Filas alternadas: separacion sutil y limpia, sin lineas grises */
+  .evidences-page .evidence-item:nth-child(odd) {
+    background: #fff;
+  }
+
+  .evidences-page .evidence-item:nth-child(even) {
+    background: #f9f9f9;
+  }
+
+  .evidences-page .evidence-item-icon {
+    width: 35px;
+    height: 35px;
+    flex: 0 0 35px;
+    display: grid;
+    place-items: center;
+    color: var(--ev-green);
+  }
+
+
+  .evidences-page .evidence-item-icon svg {
+    width: 35px;
+    height: 35px;
+    display: block;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .evidences-page .evidence-item-content {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .evidences-page .evidence-item-title {
+    display: block;
+    color: var(--ev-text);
+    font-size: 14px;
+    line-height: 1.25;
+    text-decoration: none;
+  }
+
+  .evidences-page .evidence-item-title:hover {
+    color: var(--ev-green);
+  }
+
+  .evidences-page .evidence-item-status {
+    margin: 0;
+    color: var(--ev-muted);
+    font-size: 12px;
+  }
+
+  .evidences-page .status-approved {
+    color: var(--ev-green);
+  }
+
+  .evidences-page .status-pending {
+    color: #f0a000;
+  }
+
+  .evidences-page .status-correction {
+    color: #d96a00;
+  }
+
+  .evidences-page .status-missing {
+    color: #d93636;
+  }
+
+  .evidences-page .evidence-empty {
+    padding: 22px 28px;
+    color: var(--ev-muted);
+    font-size: 14px;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  @media (max-width: 1050px) {
+    .evidences-page .evidence-category-cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 680px) {
+    .evidences-page .evidence-category-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .evidences-page .evidence-accordion summary {
+      min-height: 70px;
+      padding: 0 18px;
+    }
+
+    .evidences-page .evidence-item {
+      padding: 16px 18px;
+    }
+  }
+</style>
+
+<div class="evidences-page">
+
+  {# =========================================================================
+     CABECERA
+     ========================================================================= #}
+
+  <header class="page-head">
+    <h1>Evidencias</h1>
+    <p>Entrega de evidencias según su tipo por parte de los aprendices</p>
+  </header>
+
+
+  {# =========================================================================
+     TARJETAS DE CATEGORÍAS
+     Se recorren las EvidenceCategory activas de la BD.
+     El catálogo institucional no depende de constantes Python.
+     ========================================================================= #}
+
+  <section
+    class="evidence-category-cards"
+    aria-label="Resumen de evidencias por categoría"
+  >
+
+    {% for category in evidence_categories %}
+
+      {% set info = evidence_groups.get(category.code, {}) %}
+      {% set category_submissions = info.submissions|default([], true) %}
+      {% set total = category_submissions|length %}
+      {% set approved = info.approved|default(0, true) %}
+
+      <article class="evidence-category-card">
+
+        <div class="evidence-category-icon" aria-hidden="true"{% if category.color %} style="color: {{ category.color }};"{% endif %}>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path d="M8.75 11.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 2.75a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 2.75a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm4.835-14.414 5.829 5.828A2 2 0 0 1 20 9.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h6.172c.028 0 .055.004.082.007.02.003.04.006.059.007.215.015.427.056.624.138.057.024.112.056.166.087l.05.029.047.024a.652.652 0 0 1 .081.044c.078.053.148.116.219.18a.63.63 0 0 0 .036.03.491.491 0 0 1 .049.04ZM18 20.5a.5.5 0 0 0 .5-.5V10H14a2 2 0 0 1-2-2V3.5H6a.5.5 0 0 0-.5.5v16a.5.5 0 0 0 .5.5h12Zm-.622-12L13.5 4.621V8a.5.5 0 0 0 .5.5h3.378Z" fill="currentColor"/>
+          </svg>
+        </div>
+
+        <div class="evidence-category-info">
+          <h2 class="evidence-category-name">
+            {{ category.name }}
+          </h2>
+
+          <p class="evidence-category-progress">
+            Aprobados {{ approved }} de {{ total }}
+          </p>
+        </div>
+
+      </article>
+
+    {% endfor %}
+
+  </section>
+
+
+  {# =========================================================================
+     ACORDEONES DE EVIDENCIAS
+     Primera categoría abierta; las demás cerradas.
+     ========================================================================= #}
+
+  <section aria-label="Evidencias por categoría">
+
+    {% for category in evidence_categories %}
+
+      {% set info = evidence_groups.get(category.code, {}) %}
+      {% set category_submissions = info.submissions|default([], true) %}
+      {% set total = category_submissions|length %}
+
+      <details class="evidence-accordion">
+
+        <summary>
+
+          <span>{{ category.name }}</span>
+
+        </summary>
+
+
+        <div class="evidence-items">
+
+          {% if category_submissions %}
+
+            {% for submission in category_submissions %}
+
+              {% set current_status = submission.status or '' %}
+              {% set activity_title =
+                submission.activity.title
+                if submission.activity and submission.activity.title
+                else (
+                  submission.activity.name
+                  if submission.activity and submission.activity.name
+                  else 'Actividad'
+                )
+              %}
+
+              <div class="evidence-item">
+
+                <div class="evidence-item-icon" aria-hidden="true"{% if category.color %} style="color: {{ category.color }};"{% endif %}>
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path d="M8.75 11.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 2.75a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 2.75a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm4.835-14.414 5.829 5.828A2 2 0 0 1 20 9.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h6.172c.028 0 .055.004.082.007.02.003.04.006.059.007.215.015.427.056.624.138.057.024.112.056.166.087l.05.029.047.024a.652.652 0 0 1 .081.044c.078.053.148.116.219.18a.63.63 0 0 0 .036.03.491.491 0 0 1 .049.04ZM18 20.5a.5.5 0 0 0 .5-.5V10H14a2 2 0 0 1-2-2V3.5H6a.5.5 0 0 0-.5.5v16a.5.5 0 0 0 .5.5h12Zm-.622-12L13.5 4.621V8a.5.5 0 0 0 .5.5h3.378Z" fill="currentColor"/>
+                  </svg>
+                </div>
+
+
+                <div class="evidence-item-content">
+
+                  <a
+                    class="evidence-item-title"
+                    href="{{ url_for(
+                      'evidences.detail',
+                      submission_id=submission.id
+                    ) }}"
+                  >
+                    {{ activity_title }}
+                  </a>
+
+
+                  {% set canonical_status = (submission.status or EVIDENCE_STATUS_NOT_SUBMITTED) | lower | trim %}
+                  {% set status_label = status_labels.get(canonical_status, 'No entregado') %}
+                  {% set status_color = status_colors.get(canonical_status, status_colors.get(EVIDENCE_STATUS_NOT_SUBMITTED, '#d13438')) %}
+
+                  <p class="evidence-item-status">
+                    Estado:
+                    <span style="color: {{ status_color }}; font-weight: 600;">{{ status_label }}</span>
+                  </p>
+
+                </div>
+
+              </div>
+
+            {% endfor %}
+
+          {% else %}
+
+            <div class="evidence-empty">
+              No hay evidencias registradas en esta categoría.
+            </div>
+
+          {% endif %}
+
+        </div>
+
+      </details>
+
+    {% endfor %}
+
+  </section>
+
+</div>
+
+{% endblock %}

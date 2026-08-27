@@ -1,0 +1,1324 @@
+{# =============================================================================
+   templates/evidences/detail.html
+   Diseño de detalle de evidencia — GIA
+   ============================================================================= #}
+
+{% extends "base.html" %}
+
+{% block title %}
+  {{ submission.activity.title }} | GIA
+{% endblock %}
+
+{% block content %}
+
+<style>
+  /* =========================================================================
+     EVIDENCIAS · DETAIL
+     Referencia visual:
+     - cabecera limpia con grupo/aprendiz
+     - tarjeta superior de actividad
+     - estado independiente
+     - archivos enviados como fila compacta
+     - información en filas alternadas
+     - verde institucional para acciones y categoría inicial
+     - sin bordes grises redondeados alrededor de cada actividad
+     ========================================================================= */
+
+  .evidence-detail-page {
+    --ed-green: #39a900;
+    --ed-green-dark: #2f8f00;
+    --ed-orange: #ff6b00;
+    --ed-cyan: #00a9c7;
+    --ed-pink: #e3267f;
+    --ed-text: #222;
+    --ed-muted: #6f6f6f;
+    --ed-bg: #f3f3f3;
+    --ed-card: #fff;
+    --ed-row: #f8f8f8;
+    --ed-line: #d9d9d9;
+    --ed-shadow: 0 4px 12px rgba(0, 0, 0, .10);
+
+    color: var(--ed-text);
+  }
+
+  .evidence-detail-page * {
+    box-sizing: border-box;
+  }
+
+  /* -------------------------------------------------------------------------
+     Navegación
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .evidence-back {
+    margin: 0 0 28px;
+  }
+
+  .evidence-detail-page .evidence-back a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ed-green);
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.4;
+    text-decoration: none;
+    box-shadow: none;
+  }
+
+  .evidence-detail-page .evidence-back a:hover {
+    color: var(--ed-green-dark);
+    text-decoration: none;
+  }
+
+  /* -------------------------------------------------------------------------
+     Tarjeta superior
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .evidence-summary {
+    background: var(--ed-card);
+    border-radius: 11px;
+    box-shadow: var(--ed-shadow);
+    padding: 25px 26px 21px;
+    margin-bottom: 18px;
+  }
+
+  .evidence-detail-page .evidence-summary__context {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  .evidence-detail-page .evidence-summary__apprentice {
+    margin: 2px 0 17px;
+    color: var(--ed-muted);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .evidence-detail-page .evidence-summary__divider {
+    height: 1px;
+    background: var(--ed-line);
+    margin: 0 0 17px;
+  }
+
+  .evidence-detail-page .evidence-summary__activity {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+  }
+
+  .evidence-detail-page .evidence-category-icon {
+    width: 34px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    color: var(--ed-green);
+  }
+
+  .evidence-detail-page .evidence-category-icon svg {
+    width: 34px;
+    height: 40px;
+    display: block;
+    fill: currentColor;
+  }
+
+  .evidence-detail-page .evidence-category-icon--initial {
+    color: var(--ed-green);
+  }
+
+  .evidence-detail-page .evidence-category-icon--logs {
+    color: var(--ed-orange);
+  }
+
+  .evidence-detail-page .evidence-category-icon--followup {
+    color: var(--ed-cyan);
+  }
+
+  .evidence-detail-page .evidence-category-icon--certification {
+    color: var(--ed-pink);
+  }
+
+  .evidence-detail-page .evidence-summary__title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page .evidence-summary__category {
+    margin: 2px 0 0;
+    color: var(--ed-muted);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  /* -------------------------------------------------------------------------
+     Bloque de estado
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .evidence-status-card {
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    background: var(--ed-card);
+    border-radius: 11px;
+    box-shadow: var(--ed-shadow);
+    padding: 18px 25px;
+    margin-bottom: 16px;
+  }
+
+  .evidence-detail-page .evidence-status-card h2 {
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page .evidence-status-card__left {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .evidence-detail-page .evidence-status-card__state {
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page .evidence-review-btn--disabled,
+  .evidence-detail-page .evidence-add-btn--disabled {
+    opacity: .55;
+    cursor: not-allowed;
+  }
+
+
+  .evidence-detail-page .evidence-review-btn {
+    border: 1px solid var(--ed-line);
+    border-radius: 7px;
+    padding: 9px 14px;
+    background: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .evidence-detail-page .evidence-review-btn--correction {
+    border-color: #e7b36a;
+    color: #a45d00;
+    background: #fff8ef;
+  }
+
+  .evidence-detail-page .evidence-review-btn--correction:hover {
+    background: #fff1dc;
+  }
+
+
+  .evidence-detail-page .evidence-status-card__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .evidence-detail-page .evidence-inline-upload {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .evidence-detail-page .evidence-inline-upload-form {
+    display: inline;
+    margin: 0;
+  }
+
+  .evidence-detail-page .evidence-inline-upload-form input[type=file] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .evidence-detail-page .evidence-add-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 31px;
+    padding: 6px 14px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--ed-green);
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: none;
+  }
+
+  .evidence-detail-page .evidence-add-btn:hover {
+    background: var(--ed-green-dark);
+    color: #fff;
+  }
+
+  /* -------------------------------------------------------------------------
+     Archivos enviados
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .evidence-files-card {
+    background: var(--ed-card);
+    border-radius: 11px;
+    box-shadow: var(--ed-shadow);
+    padding: 20px 25px;
+    margin-bottom: 16px;
+  }
+
+  .evidence-detail-page .evidence-files-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 9px;
+    min-height: 40px;
+  }
+
+  .evidence-detail-page .evidence-files-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 2px;
+  }
+
+  .evidence-detail-page .evidence-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ed-text);
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .evidence-detail-page .evidence-file a {
+    color: var(--ed-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .evidence-detail-page .evidence-file a:hover {
+    color: var(--ed-green);
+  }
+
+  .evidence-detail-page .evidence-file-date {
+    color: var(--ed-muted);
+    font-size: 12px;
+  }
+
+  .evidence-detail-page .file-type-badge {
+    width: 25px;
+    height: 32px;
+    display: inline-flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    padding-bottom: 3px;
+    border-radius: 5px;
+    background: #ef2020;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .evidence-detail-page .file-type-badge::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-top: 8px solid #fff;
+    border-left: 8px solid transparent;
+    opacity: .9;
+  }
+
+  .evidence-detail-page .file-type-badge--word {
+    background: #2b579a;
+  }
+
+  .evidence-detail-page .file-type-badge--excel {
+    background: #16874a;
+  }
+
+  .evidence-detail-page .file-type-badge--image {
+    background: #7b4bc4;
+  }
+
+  /* -------------------------------------------------------------------------
+     Información
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .evidence-info-card {
+    overflow: hidden;
+    background: var(--ed-card);
+    border-radius: 11px;
+    box-shadow: var(--ed-shadow);
+    margin-bottom: 18px;
+  }
+
+  .evidence-detail-page .evidence-info-row {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    min-height: 52px;
+    align-items: center;
+    padding: 0 25px;
+  }
+
+  .evidence-detail-page .evidence-info-row:nth-child(even) {
+    background: var(--ed-row);
+  }
+
+  .evidence-detail-page .evidence-info-label {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page .evidence-info-value {
+    min-width: 0;
+    color: var(--ed-muted);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .evidence-detail-page .evidence-info-value--status {
+    color: #f2a900;
+  }
+
+  .evidence-detail-page .evidence-info-value--green {
+    color: var(--ed-green);
+  }
+
+  .evidence-detail-page .evidence-comments-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--ed-green);
+    text-decoration: none;
+  }
+
+  .evidence-detail-page .evidence-comments-link::before {
+    content: "›";
+    font-size: 28px;
+    line-height: 16px;
+    font-weight: 300;
+  }
+
+  .evidence-detail-page .evidence-comments-link:hover {
+    color: var(--ed-green-dark);
+  }
+
+  .evidence-detail-page .evidence-comments-row {
+    align-items: start;
+  }
+
+  .evidence-detail-page .evidence-info-value--comments {
+    color: var(--ed-text);
+  }
+
+  .evidence-detail-page .evidence-comments-accordion {
+    width: 100%;
+  }
+
+  .evidence-detail-page .evidence-comments-accordion summary {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    cursor: pointer;
+    color: var(--ed-green);
+    list-style: none;
+    user-select: none;
+  }
+
+  .evidence-detail-page .evidence-comments-accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .evidence-detail-page .evidence-comments-accordion summary::before {
+    content: "›";
+    display: inline-block;
+    font-size: 28px;
+    line-height: 16px;
+    font-weight: 300;
+    transform: rotate(0deg);
+    transition: transform .15s ease;
+  }
+
+  .evidence-detail-page .evidence-comments-accordion[open] summary::before {
+    transform: rotate(90deg);
+  }
+
+  .evidence-detail-page .evidence-comments-accordion summary:hover {
+    color: var(--ed-green-dark);
+  }
+
+  .evidence-detail-page .evidence-comments-panel {
+    margin-top: 13px;
+    padding: 16px;
+    border: 1px solid var(--ed-line);
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .evidence-detail-page .evidence-comments-intro {
+    margin: 0 0 12px;
+  }
+
+  .evidence-detail-page .evidence-comment-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .evidence-detail-page .evidence-comment-item {
+    padding: 13px 14px;
+    border: 1px solid var(--ed-line);
+    border-radius: 9px;
+    background: #fff;
+  }
+
+  .evidence-detail-page .evidence-comment-item--correction {
+    border-left: 4px solid var(--ed-orange);
+    background: #fffaf4;
+  }
+
+  .evidence-detail-page .evidence-comment-item__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .evidence-detail-page .evidence-comment-item__meta {
+    text-align: right;
+  }
+
+  .evidence-detail-page .evidence-comment-item__body {
+    margin: 10px 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+
+  .evidence-detail-page .evidence-comment-badge {
+    display: inline-flex;
+    margin-top: 10px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #fff0df;
+    color: #b95f00;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page .evidence-comments-empty {
+    padding: 12px 14px;
+    border: 1px dashed #cfd5dc;
+    border-radius: 8px;
+    background: #fafbfc;
+    color: var(--ed-muted);
+  }
+
+  .evidence-detail-page .evidence-comments-form {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ed-line);
+  }
+
+  .evidence-detail-page .evidence-correction-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 14px;
+  }
+
+  .evidence-detail-page .evidence-correction-help {
+    margin: 6px 0 0;
+  }
+
+  /* -------------------------------------------------------------------------
+     Área de acciones / formularios secundarios
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .evidence-extra-card {
+    background: var(--ed-card);
+    border-radius: 11px;
+    box-shadow: var(--ed-shadow);
+    padding: 24px 25px;
+    margin-bottom: 18px;
+  }
+
+  .evidence-detail-page .evidence-extra-card h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page .evidence-extra-card p {
+    margin: 0 0 14px;
+  }
+
+  .evidence-detail-page .evidence-form-label {
+    display: block;
+    margin: 0 0 7px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .evidence-detail-page input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: #fff;
+    font: inherit;
+  }
+
+  .evidence-detail-page textarea {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 11px 12px;
+    background: #fff;
+    color: var(--ed-text);
+    font: inherit;
+    resize: vertical;
+  }
+
+  .evidence-detail-page .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .evidence-detail-page .separator {
+    border: 0;
+    border-top: 1px solid var(--ed-line);
+    margin: 22px 0;
+  }
+
+  .evidence-detail-page .muted {
+    color: var(--ed-muted);
+  }
+
+  .evidence-detail-page .empty-state {
+    margin: 8px 0 0;
+    color: var(--ed-muted);
+    font-size: 14px;
+  }
+
+  .evidence-detail-page .comment-history {
+    margin: 0;
+    padding: 14px;
+    background: var(--ed-row);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font: inherit;
+    line-height: 1.5;
+  }
+
+  .evidence-detail-page .compact-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .evidence-detail-page .compact-list li {
+    padding: 11px 0;
+    border-bottom: 1px solid var(--ed-line);
+    font-size: 14px;
+  }
+
+  .evidence-detail-page .compact-list li:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  /* -------------------------------------------------------------------------
+     Visor PDF integrado GIA
+     ------------------------------------------------------------------------- */
+
+  .evidence-detail-page .gia-pdf-viewer[hidden] { display: none; }
+  .evidence-detail-page .gia-pdf-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    background: #202124;
+    color: #fff;
+  }
+  .evidence-detail-page .gia-pdf-viewer__toolbar {
+    min-height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 14px;
+    background: #282828;
+    border-bottom: 1px solid rgba(255,255,255,.12);
+  }
+  .evidence-detail-page .gia-pdf-viewer__left,
+  .evidence-detail-page .gia-pdf-viewer__right,
+  .evidence-detail-page .gia-pdf-viewer__controls {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .evidence-detail-page .gia-pdf-viewer__file {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+  .evidence-detail-page .gia-pdf-viewer__file-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #f04444; color: #fff; font-size: 10px; font-weight: 800;
+  }
+  .evidence-detail-page .gia-pdf-viewer__filename {
+    max-width: min(42vw, 540px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 14px;
+  }
+  .evidence-detail-page .gia-pdf-viewer__btn {
+    border: 0; border-radius: 7px; padding: 8px 11px; cursor: pointer;
+    background: transparent; color: #fff; font: inherit;
+  }
+  .evidence-detail-page .gia-pdf-viewer__btn:hover { background: rgba(255,255,255,.12); }
+  .evidence-detail-page .gia-pdf-viewer__btn--primary { background: #00bfa6; color: #10201d; font-weight: 700; }
+  .evidence-detail-page .gia-pdf-viewer__btn--primary:hover { background: #12d2b8; }
+  .evidence-detail-page .gia-pdf-viewer__stage {
+    position: relative; flex: 1 1 auto; min-height: 0; overflow: auto;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 28px 24px 86px; background: #252525;
+  }
+  .evidence-detail-page .gia-pdf-viewer__page-wrap {
+    position: relative; background: #fff; box-shadow: 0 18px 48px rgba(0,0,0,.35);
+  }
+  .evidence-detail-page .gia-pdf-viewer__page { display:block; max-width:none; }
+  .evidence-detail-page .gia-pdf-viewer__loading {
+    position: absolute; inset: 0; display:flex; align-items:center; justify-content:center;
+    color: #ddd; font-size: 14px; background: rgba(32,33,36,.55);
+  }
+  .evidence-detail-page .gia-pdf-viewer__loading[hidden] { display:none; }
+  .evidence-detail-page .gia-pdf-viewer__bottombar {
+    position: absolute; left:50%; bottom:18px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:8px; padding:8px 12px;
+    background:#2b2b2b; border:1px solid rgba(255,255,255,.08);
+    border-radius:22px; box-shadow:0 8px 25px rgba(0,0,0,.35);
+  }
+  .evidence-detail-page .gia-pdf-viewer__page-input {
+    width:42px; text-align:center; border:1px solid #777; border-radius:5px;
+    background:#fff; color:#222; padding:4px 2px;
+  }
+  .evidence-detail-page .gia-pdf-viewer__zoom-label { min-width:52px; text-align:center; font-size:13px; }
+  .evidence-detail-page .gia-pdf-viewer__spacer { flex:1; }
+  @media (max-width: 760px) {
+    .evidence-detail-page .gia-pdf-viewer__toolbar { flex-wrap: wrap; min-height: 74px; }
+    .evidence-detail-page .gia-pdf-viewer__filename { max-width: 50vw; }
+    .evidence-detail-page .gia-pdf-viewer__right .gia-pdf-viewer__btn:not(.gia-pdf-viewer__btn--primary) { display:none; }
+    .evidence-detail-page .gia-pdf-viewer__stage { padding:18px 8px 80px; }
+  }
+
+  /* -------------------------------------------------------------------------
+     Responsive
+     ------------------------------------------------------------------------- */
+
+  @media (max-width: 700px) {
+    .evidence-detail-page .evidence-summary {
+      padding: 20px;
+    }
+
+    .evidence-detail-page .evidence-status-card {
+      align-items: flex-start;
+      flex-direction: column;
+      padding: 18px 20px;
+    }
+
+    .evidence-detail-page .evidence-status-card__right {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .evidence-detail-page .evidence-files-card {
+      padding: 17px 20px;
+    }
+
+    .evidence-detail-page .evidence-info-row {
+      grid-template-columns: 1fr;
+      gap: 3px;
+      padding: 11px 20px;
+    }
+
+    .evidence-detail-page .evidence-info-label {
+      font-size: 13px;
+    }
+
+    .evidence-detail-page .evidence-info-value {
+      padding-bottom: 2px;
+    }
+  }
+</style>
+
+
+<div class="evidence-detail-page">
+
+  {# =========================================================================
+     CATEGORÍA VISUAL
+     ========================================================================= #}
+
+  {% set detail_category_code = submission.activity.category.code if submission.activity.category else 'uncategorized' %}
+{% set detail_category_title = submission.activity.category.name if submission.activity.category else 'Sin categoría' %}
+{% if detail_category_code == 'logs' %}
+  {% set detail_category_class = 'logs' %}
+{% elif detail_category_code == 'followup_moments' %}
+  {% set detail_category_class = 'followup' %}
+{% elif detail_category_code == 'certification_requirements' %}
+  {% set detail_category_class = 'certification' %}
+{% else %}
+  {% set detail_category_class = 'initial' %}
+{% endif %}
+
+
+  {# =========================================================================
+     VOLVER
+     ========================================================================= #}
+
+  <div class="evidence-back">
+    <a href="{{ url_for('evidences.index') }}">
+      ← Volver a evidencias
+    </a>
+  </div>
+
+
+  {# =========================================================================
+     RESUMEN SUPERIOR
+     ========================================================================= #}
+
+  <section class="evidence-summary" aria-labelledby="evidence-activity-title">
+
+    {% if submission.apprentice and submission.apprentice.group_number %}
+      <p class="evidence-summary__context">
+        Grupo {{ submission.apprentice.group_number }}
+      </p>
+    {% elif submission.apprentice %}
+      <p class="evidence-summary__context">
+        {{ submission.apprentice.full_name }}
+      </p>
+    {% else %}
+      <p class="evidence-summary__context">
+        Evidencia
+      </p>
+    {% endif %}
+
+    {% if submission.apprentice %}
+      <p class="evidence-summary__apprentice">
+        {{ submission.apprentice.full_name }}
+        {% if submission.apprentice.group_number %}
+          · Ficha {{ submission.apprentice.group_number }}
+        {% endif %}
+      </p>
+    {% endif %}
+
+    <div class="evidence-summary__divider"></div>
+
+    <div class="evidence-summary__activity">
+
+      <div
+        class="evidence-category-icon evidence-category-icon--{{ detail_category_class }}"
+        aria-hidden="true"
+        title="{{ detail_category_title }}"
+      >
+        <svg width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true">
+          <path d="M8.75 11.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 2.75a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 2.75a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm4.835-14.414 5.829 5.828A2 2 0 0 1 20 9.828V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h6.172c.028 0 .055.004.082.007.02.003.04.006.059.007.215.015.427.056.624.138.057.024.112.056.166.087l.05.029.047.024a.652.652 0 0 1 .081.044c.078.053.148.116.219.18a.63.63 0 0 0 .036.03.491.491 0 0 1 .049.04ZM18 20.5a.5.5 0 0 0 .5-.5V10H14a2 2 0 0 1-2-2V3.5H6a.5.5 0 0 0-.5.5v16a.5.5 0 0 0 .5.5h12Zm-.622-12L13.5 4.621V8a.5.5 0 0 0 .5.5h3.378Z" fill="currentColor"/>
+        </svg>
+      </div>
+
+      <div>
+        <h1
+          id="evidence-activity-title"
+          class="evidence-summary__title"
+        >
+          {{ submission.activity.title }}
+        </h1>
+
+        <p class="evidence-summary__category">
+          {{ detail_category_title }}
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  {# =========================================================================
+     ESTADO + ACCIONES
+     ========================================================================= #}
+
+  <section class="evidence-status-card" aria-labelledby="status-heading">
+    <div class="evidence-status-card__left">
+      <h2 id="status-heading">Estado de la evidencia</h2>
+      <div class="evidence-status-card__state" style="color: {{ submission.status_color }};">
+        {{ submission.status_label }}
+      </div>
+    </div>
+
+    <div class="evidence-status-card__right">
+
+      {% if show_review_controls %}
+        {% if can_request_correction %}
+          <button
+            class="evidence-review-btn evidence-review-btn--correction"
+            type="button"
+            data-request-correction
+          >
+            Solicitar corrección
+          </button>
+        {% elif is_instructor_reviewer and submission.status == EVIDENCE_STATUS_REQUIRES_CORRECTION %}
+          <button
+            class="evidence-review-btn evidence-review-btn--disabled"
+            type="button"
+            disabled
+            title="La evidencia ya está en corrección; espera la reentrega del aprendiz."
+          >
+            Corrección solicitada
+          </button>
+        {% endif %}
+
+        {% if can_approve_evidence %}
+          <form method="post" action="{{ url_for('evidences.approve', submission_id=submission.id) }}">
+            {% if csrf_token is defined %}
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            {% endif %}
+            <button class="evidence-add-btn" type="submit">Aprobar evidencia</button>
+          </form>
+        {% elif is_approval_reviewer and submission.status == EVIDENCE_STATUS_REQUIRES_CORRECTION %}
+          <button
+            class="evidence-add-btn evidence-add-btn--disabled"
+            type="button"
+            disabled
+            title="La aprobación se habilitará después de la reentrega y nueva revisión."
+          >
+            Aprobar evidencia
+          </button>
+        {% endif %}
+      {% endif %}
+
+      {% if show_review_controls and review_action_block_reason and not can_request_correction and not can_approve_evidence %}
+        <span class="muted evidence-review-block-reason">{{ review_action_block_reason }}</span>
+      {% endif %}
+
+      {% if current_user.role == 'APPRENTICE' and submission.can_be_resubmitted %}
+        <form
+          method="post"
+          enctype="multipart/form-data"
+          action="{{ url_for('evidences.upload', submission_id=submission.id) }}"
+          class="evidence-inline-upload-form"
+          id="inline-upload-form"
+        >
+          {% if csrf_token is defined %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% endif %}
+          <input
+            id="inline-evidence-file"
+            class="evidence-inline-upload"
+            type="file"
+            name="file"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp"
+            required
+          >
+          <button
+            class="evidence-add-btn"
+            type="button"
+            id="inline-upload-trigger"
+          >
+            {% if submission.has_file %}Reemplazar evidencia{% else %}Agregar evidencia{% endif %}
+          </button>
+        </form>
+      {% endif %}
+
+    </div>
+  </section>
+
+
+  {# =========================================================================
+     ARCHIVOS ENVIADOS
+     ========================================================================= #}
+
+  <section class="evidence-files-card" aria-labelledby="files-heading">
+    <div class="evidence-files-row">
+      <span id="files-heading" class="evidence-files-label">Archivos enviados</span>
+
+      {% if submission.has_file %}
+        <span class="evidence-file">
+          {% set file_name_lower = (submission.file_name or '')|lower %}
+          {% if submission.is_pdf or file_name_lower.endswith('.pdf') %}
+            {% set file_type_class = '' %}
+            {% set file_type_text = 'PDF' %}
+          {% elif file_name_lower.endswith('.doc') or file_name_lower.endswith('.docx') %}
+            {% set file_type_class = 'file-type-badge--word' %}
+            {% set file_type_text = 'DOC' %}
+          {% elif file_name_lower.endswith('.xls') or file_name_lower.endswith('.xlsx') %}
+            {% set file_type_class = 'file-type-badge--excel' %}
+            {% set file_type_text = 'XLS' %}
+          {% elif file_name_lower.endswith('.jpg') or file_name_lower.endswith('.jpeg') or file_name_lower.endswith('.png') or file_name_lower.endswith('.gif') or file_name_lower.endswith('.webp') %}
+            {% set file_type_class = 'file-type-badge--image' %}
+            {% set file_type_text = 'IMG' %}
+          {% else %}
+            {% set file_type_class = '' %}
+            {% set file_type_text = 'FILE' %}
+          {% endif %}
+
+          <span class="file-type-badge {{ file_type_class }}" aria-hidden="true">{{ file_type_text }}</span>
+
+          {% if submission.is_pdf or file_name_lower.endswith('.pdf') %}
+            <button type="button" class="evidence-comments-link" data-open-pdf-viewer>
+              {{ submission.file_name or 'Archivo de evidencia' }}
+            </button>
+            <a class="evidence-file-date" href="{{ url_for('evidences.download', submission_id=submission.id) }}">Descargar</a>
+          {% else %}
+            <a href="{{ url_for('evidences.download', submission_id=submission.id) }}">
+              {{ submission.file_name or 'Archivo de evidencia' }}
+            </a>
+          {% endif %}
+
+          {% if submission.uploaded_at %}
+            <span class="evidence-file-date">{{ format_datetime_local(submission.uploaded_at) }}</span>
+          {% endif %}
+        </span>
+      {% else %}
+        <span class="muted">No se ha enviado ningún archivo.</span>
+      {% endif %}
+    </div>
+  </section>
+
+
+  {# =========================================================================
+     INFORMACIÓN DE LA EVIDENCIA + CONVERSACIÓN
+     ========================================================================= #}
+
+  <section class="evidence-info-card" aria-label="Información de la evidencia">
+
+    <div class="evidence-info-row">
+      <div class="evidence-info-label">Descripción</div>
+      <div class="evidence-info-value">{{ submission.activity.description or 'Sin descripción' }}</div>
+    </div>
+
+    <div class="evidence-info-row">
+      <div class="evidence-info-label">Fecha límite de entrega</div>
+      <div class="evidence-info-value">
+        {% if submission.activity.due_start or submission.activity.due_end %}
+          {% if submission.activity.due_start %}{{ submission.activity.due_start }}{% else %}Sin fecha inicial{% endif %}
+          —
+          {% if submission.activity.due_end %}{{ submission.activity.due_end }}{% else %}Sin fecha final{% endif %}
+        {% else %}
+          Sin fecha límite
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="evidence-info-row">
+      <div class="evidence-info-label">Estado</div>
+      <div class="evidence-info-value evidence-info-value--status"
+           style="color: {{ submission.status_color }}; font-weight: 600;">
+        {{ submission.status_label }}
+      </div>
+    </div>
+
+    {% if submission.uploaded_at %}
+      <div class="evidence-info-row">
+        <div class="evidence-info-label">Fecha de entrega</div>
+        <div class="evidence-info-value">{{ format_datetime_local(submission.uploaded_at) }}</div>
+      </div>
+    {% endif %}
+
+    <div class="evidence-info-row evidence-comments-row">
+      <div class="evidence-info-label">Comentarios de la evidencia</div>
+      <div class="evidence-info-value evidence-info-value--comments">
+        <details class="evidence-comments-accordion" id="comentarios">
+          <summary><span>Comentarios ({{ submission.comments|length if submission.comments else 0 }})</span></summary>
+          <div class="evidence-comments-panel">
+            <p class="muted evidence-comments-intro">
+              Conversación de esta actividad. Los comentarios permanecen aunque exista una reentrega.
+            </p>
+
+            {% if submission.comments %}
+              <div class="evidence-comment-thread">
+                {% for comment in submission.comments %}
+                  <article class="evidence-comment-item{% if comment.is_correction_request %} evidence-comment-item--correction{% endif %}">
+                    <div class="evidence-comment-item__head">
+                      <div>
+                        <strong>{{ comment.author_name or 'Sistema' }}</strong>
+                        <div class="muted">{{ comment.author_role_label }}</div>
+                      </div>
+                      <div class="muted evidence-comment-item__meta">
+                        {{ format_datetime_local(comment.created_at) }}
+                        {% if comment.attempt %}
+                          <div>Versión {{ comment.attempt.version_number }} · Intento {{ comment.attempt.attempt_number }}</div>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <p class="evidence-comment-item__body">{{ comment.comment }}</p>
+                    {% if comment.is_correction_request %}
+                      <div class="evidence-comment-badge">Solicitud de corrección</div>
+                    {% endif %}
+                  </article>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="evidence-comments-empty">Aún no hay comentarios en esta actividad.</div>
+            {% endif %}
+
+            {% if can_comment %}
+              <form method="post" action="{{ url_for('evidences.add_comment', submission_id=submission.id) }}" class="evidence-comments-form" id="evidence-comments-form">
+                {% if csrf_token is defined %}
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                {% endif %}
+                <label for="activity-comment" class="evidence-form-label">Agregar comentario</label>
+                <textarea id="activity-comment" name="comment" rows="4" placeholder="Escribe un comentario sobre esta actividad o evidencia..." required></textarea>
+                {% if is_instructor_reviewer %}
+                  <label class="evidence-correction-toggle">
+                    <input id="request-correction-checkbox" type="checkbox" name="request_correction" value="1" {% if not can_request_correction %}disabled{% endif %}>
+                    <span>Solicitar corrección de la evidencia</span>
+                  </label>
+                  {% if can_request_correction %}
+                    <p class="muted evidence-correction-help">Al seleccionarlo, este comentario queda identificado como la solicitud de corrección y la evidencia pasa a <strong>Requiere corrección</strong>.</p>
+                  {% else %}
+                    <p class="muted evidence-correction-help">Esta opción se habilita cuando la evidencia está <strong>Pendiente de revisión</strong> con una nueva entrega disponible.</p>
+                  {% endif %}
+                {% endif %}
+                <div class="form-actions">
+                  <button class="primary-btn" type="submit">Comentar</button>
+                </div>
+              </form>
+            {% endif %}
+          </div>
+        </details>
+      </div>
+    </div>
+
+    {% if submission.history and current_user.role != 'APPRENTICE' %}
+      <div class="evidence-info-row">
+        <div class="evidence-info-label">Historial</div>
+        <div class="evidence-info-value">
+          <details class="evidence-comments-accordion">
+            <summary><span>Historial de cambios</span></summary>
+            <div class="evidence-comments-panel">
+              <ul class="compact-list">
+                {% for h in submission.history %}
+                  <li>
+                    <strong>{{ h.actor_name }}</strong>
+                    <span class="muted">— {{ h.action }}{% if h.created_at %} ({{ h.created_at }}){% endif %}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </details>
+        </div>
+      </div>
+    {% endif %}
+
+  </section>
+
+
+  {# Historial de entregas conserva trazabilidad y queda disponible solo para roles internos. #}
+  {% if submission.attempt_history and current_user.role != 'APPRENTICE' %}
+    <section class="evidence-extra-card" aria-labelledby="attempts-heading">
+      <h2 id="attempts-heading">Historial de entregas</h2>
+      <div class="evidence-observations">
+        <pre class="comment-history">{% for attempt in submission.attempt_history %}Intento {{ attempt.attempt_number }} — versión {{ attempt.version_number }}
+Estado: {{ EVIDENCE_STATUS_LABELS.get(attempt.status, attempt.status) }}
+Fecha: {{ format_datetime_local(attempt.uploaded_at) if attempt.uploaded_at else 'Sin fecha' }}
+{% if attempt.file_name %}Archivo: {{ attempt.file_name }}{% endif %}
+
+{% endfor %}</pre>
+      </div>
+    </section>
+  {% endif %}
+
+  {# =========================================================================
+     VISOR PDF INTEGRADO ORIGINAL
+     ========================================================================= #}
+
+  {% if submission.has_file and submission.is_pdf and pdf_page_count %}
+    <div class="gia-pdf-viewer" id="giaPdfViewer" hidden data-viewer-kind="original">
+      <div class="gia-pdf-viewer__toolbar">
+        <div class="gia-pdf-viewer__left">
+          <div class="gia-pdf-viewer__file">
+            <span class="gia-pdf-viewer__file-icon">PDF</span>
+            <span class="gia-pdf-viewer__filename" title="{{ submission.file_name or 'Documento PDF' }}">{{ submission.file_name or 'Documento PDF' }}</span>
+          </div>
+        </div>
+        <div class="gia-pdf-viewer__right">
+          <a class="gia-pdf-viewer__btn" href="{{ url_for('evidences.download', submission_id=submission.id) }}">Descargar</a>
+          <button type="button" class="gia-pdf-viewer__btn" data-pdf-print>Imprimir</button>
+          <button type="button" class="gia-pdf-viewer__btn" data-pdf-close aria-label="Cerrar visor">✕</button>
+        </div>
+      </div>
+      <div class="gia-pdf-viewer__stage" data-pdf-stage>
+        <div class="gia-pdf-viewer__page-wrap">
+          <img class="gia-pdf-viewer__page" data-pdf-page alt="Página del documento PDF">
+          <div class="gia-pdf-viewer__loading" data-pdf-loading>Abriendo documento…</div>
+        </div>
+        <div class="gia-pdf-viewer__bottombar">
+          <button type="button" class="gia-pdf-viewer__btn" data-pdf-prev>‹</button>
+          <input class="gia-pdf-viewer__page-input" data-pdf-page-input type="number" min="1" max="{{ pdf_page_count }}" value="1" aria-label="Número de página">
+          <span>/ {{ pdf_page_count }}</span>
+          <button type="button" class="gia-pdf-viewer__btn" data-pdf-next>›</button>
+          <span class="gia-pdf-viewer__zoom-label" data-pdf-zoom-label>100%</span>
+          <button type="button" class="gia-pdf-viewer__btn" data-pdf-zoom-out>−</button>
+          <button type="button" class="gia-pdf-viewer__btn" data-pdf-zoom-in>+</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    function initPdfViewer(viewer) {
+      if (!viewer) return;
+      var pageCount = Number(viewer.querySelector("[data-pdf-page-input]").max || 1);
+      var page = 1;
+      var zoom = 1.0;
+      var image = viewer.querySelector("[data-pdf-page]");
+      var loading = viewer.querySelector("[data-pdf-loading]");
+      var input = viewer.querySelector("[data-pdf-page-input]");
+      var zoomLabel = viewer.querySelector("[data-pdf-zoom-label]");
+
+      function urlFor() {
+        var base = "{{ url_for('evidences.pdf_page', submission_id=submission.id) }}";
+        var params = new URLSearchParams({
+          page: String(page),
+          zoom: String(Math.max(0.75, Math.min(2.5, zoom))),
+        });
+        return base + "?" + params.toString();
+      }
+
+      function render() {
+        loading.hidden = false;
+        image.onload = function () { loading.hidden = true; };
+        image.onerror = function () { loading.hidden = true; };
+        image.src = urlFor() + "&_=" + Date.now();
+        input.value = String(page);
+        zoomLabel.textContent = Math.round(zoom * 100) + "%";
+      }
+
+      function open() {
+        viewer.hidden = false;
+        document.body.style.overflow = "hidden";
+        render();
+      }
+
+      function close() {
+        viewer.hidden = true;
+        if (!document.querySelector(".gia-pdf-viewer:not([hidden])")) {
+          document.body.style.overflow = "";
+        }
+      }
+
+      viewer.querySelector("[data-pdf-close]").addEventListener("click", close);
+      viewer.querySelector("[data-pdf-prev]").addEventListener("click", function () { page = Math.max(1, page - 1); render(); });
+      viewer.querySelector("[data-pdf-next]").addEventListener("click", function () { page = Math.min(pageCount, page + 1); render(); });
+      input.addEventListener("change", function () { page = Math.max(1, Math.min(pageCount, Number(input.value) || 1)); render(); });
+      viewer.querySelector("[data-pdf-zoom-out]").addEventListener("click", function () { zoom = Math.max(0.75, +(zoom - 0.15).toFixed(2)); render(); });
+      viewer.querySelector("[data-pdf-zoom-in]").addEventListener("click", function () { zoom = Math.min(2.5, +(zoom + 0.15).toFixed(2)); render(); });
+      viewer.querySelector("[data-pdf-print]").addEventListener("click", function () {
+        var printUrl = urlFor();
+        var w = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
+        if (!w) return;
+        w.document.write("<html><head><title>Imprimir PDF</title></head><body style='margin:0;text-align:center'><img style='max-width:100%;height:auto' src='" + printUrl.replace(/'/g, "%27") + "' onload='window.print()'></body></html>");
+        w.document.close();
+      });
+
+      viewer._giaPdfViewerOpen = open;
+    }
+
+    document.querySelectorAll(".gia-pdf-viewer").forEach(initPdfViewer);
+
+    var originalViewer = document.getElementById("giaPdfViewer");
+    var originalOpen = document.querySelector("[data-open-pdf-viewer]");
+
+    if (originalOpen && originalViewer && originalViewer._giaPdfViewerOpen) {
+      originalOpen.addEventListener("click", function () { originalViewer._giaPdfViewerOpen(); });
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      document.querySelectorAll(".gia-pdf-viewer:not([hidden])").forEach(function (viewer) {
+        viewer.hidden = true;
+      });
+      if (!document.querySelector(".gia-pdf-viewer:not([hidden])")) { document.body.style.overflow = ""; }
+    });
+
+    var requestCorrectionButton = document.querySelector("[data-request-correction]");
+    var commentsAccordion = document.getElementById("comentarios");
+    var correctionCheckbox = document.getElementById("request-correction-checkbox");
+    var commentTextarea = document.getElementById("activity-comment");
+
+    if (requestCorrectionButton && commentsAccordion) {
+      requestCorrectionButton.addEventListener("click", function () {
+        commentsAccordion.open = true;
+        if (correctionCheckbox) {
+          correctionCheckbox.checked = true;
+        }
+        window.requestAnimationFrame(function () {
+          if (commentTextarea) {
+            commentTextarea.focus();
+            commentTextarea.scrollIntoView({ behavior: "smooth", block: "center" });
+          } else {
+            commentsAccordion.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        });
+      });
+    }
+
+    var inlineUploadTrigger = document.getElementById("inline-upload-trigger");
+    var inlineUploadInput = document.getElementById("inline-evidence-file");
+    var inlineUploadForm = document.getElementById("inline-upload-form");
+
+    if (inlineUploadTrigger && inlineUploadInput && inlineUploadForm) {
+      inlineUploadTrigger.addEventListener("click", function () {
+        inlineUploadInput.click();
+      });
+
+      inlineUploadInput.addEventListener("change", function () {
+        if (inlineUploadInput.files && inlineUploadInput.files.length) {
+          inlineUploadForm.submit();
+        }
+      });
+    }
+  })();
+</script>
+
+{% endblock %}
+

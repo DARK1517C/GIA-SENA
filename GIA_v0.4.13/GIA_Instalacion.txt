@@ -1,0 +1,9 @@
+1. Instalar Python
+2. Descomprimir GIA
+3. Abrir PowerShell en la carpeta
+4. python -m venv .venv
+5. .\.venv\Scripts\Activate.ps1
+6. pip install -r requirements.txt
+7. python -m flask --app app:create_app db current
+8. python -m flask --app app:create_app run
+9. Abrir http://127.0.0.1:5000

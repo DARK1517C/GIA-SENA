@@ -1,0 +1,26 @@
+# GIA migrations
+
+La cadena activa y única para una instalación limpia es:
+
+```text
+b7e2c1a4f901
+  -> 9c4d2e7a1b60
+  -> 3f8a7c2d1e90
+  -> 4a6b9c1d2e30
+  -> a5d8e7f4c2b1
+```
+
+Las migraciones históricas incompatibles permanecen exclusivamente en
+`migrations/legacy_versions/` y no forman parte del grafo Alembic activo.
+
+La última migración crea `evidence_submission_attempt`, convierte el histórico
+`observations` a `evidence_comment` y elimina la columna `observations`.
+
+Para desplegar:
+
+```powershell
+alembic upgrade head
+```
+
+
+**Importante:** `migrations/legacy_versions/` es archivo histórico y no debe copiarse a `migrations/versions/`. Para despliegues nuevos se utiliza exclusivamente la cadena activa anterior.

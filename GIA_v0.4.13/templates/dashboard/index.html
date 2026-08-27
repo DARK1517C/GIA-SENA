@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+{% set s = stats or {} %}
+
+<section class="page-head">
+  <div>
+    <h1>Estadísticas</h1>
+
+    {% if scope and scope.type == "assigned" %}
+      <p>
+        Corresponden únicamente a los grupos y aprendices asignados al instructor de seguimiento
+      </p>
+
+    {% elif scope and scope.type == "global" %}
+    <p>
+        Corresponden al conjunto global de información disponible en GIA
+      </p>
+
+    {% endif %}
+  </div>
+</section>
+
+{% if stats %}
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+      <span class="stat-icon">■</span>
+      <h3>Total de aprendices</h3>
+      <strong>{{ s.get('total_apprentices', 0) }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon">■</span>
+      <h3>Total de grupos</h3>
+      <strong>{{ s.get('total_groups', 0) }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon">✓</span>
+      <h3>Aprendices habilitados</h3>
+      <strong>{{ s.get('enabled', 0) }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon">↻</span>
+      <h3>Con alternativa</h3>
+      <strong>{{ s.get('with_alternative', 0) }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon">×</span>
+      <h3>Sin alternativa</h3>
+      <strong>{{ s.get('without_alternative', 0) }}</strong>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-icon">✓</span>
+      <h3>Certificados</h3>
+      <strong>{{ s.get('certified', 0) }}</strong>
+    </article>
+
+  </section>
+
+  <section class="analytics-grid">
+
+    <article class="panel metric-panel">
+      <h3>Aprendices por modalidad de etapa productiva</h3>
+
+      {% if stats.by_ep_modality %}
+        <div class="progress-list">
+          {% for item in stats.by_ep_modality %}
+            <div>
+              <span>{{ item.label }}</span>
+              <meter
+                min="0"
+                max="{{ s.get('total_apprentices', 1) or 1 }}"
+                value="{{ item.count }}">
+              </meter>
+              <strong>{{ item.count }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No hay modalidades de etapa productiva disponibles para el alcance seleccionado.</p>
+      {% endif %}
+    </article>
+
+    <article class="panel metric-panel">
+      <h3>Grupos por nivel de formación</h3>
+
+      {% if stats.by_program_level %}
+        <div class="progress-list">
+          {% for item in stats.by_program_level %}
+            <div>
+              <span>{{ item.label }}</span>
+              <meter
+                min="0"
+                max="{{ s.get('total_groups', 1) or 1 }}"
+                value="{{ item.count }}">
+              </meter>
+              <strong>{{ item.count }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No hay niveles de formación disponibles para el alcance seleccionado.</p>
+      {% endif %}
+    </article>
+
+  </section>
+
+  <section class="panel metric-panel" aria-label="Seguimiento de etapa productiva">
+
+    <h3>Seguimiento de etapa productiva</h3>
+
+    {% set fs = followup_summary or {} %}
+
+    <div class="stats-grid">
+      <article class="stat-card">
+        <h3>En curso</h3>
+        <strong>{{ fs.get('in_progress', 0) }}</strong>
+      </article>
+
+      <article class="stat-card">
+        <h3>En revisión</h3>
+        <strong>{{ fs.get('pending_review', 0) }}</strong>
+      </article>
+
+      <article class="stat-card">
+        <h3>Requieren corrección</h3>
+        <strong>{{ fs.get('requires_correction', 0) }}</strong>
+      </article>
+
+      <article class="stat-card">
+        <h3>Vencidos</h3>
+        <strong>{{ fs.get('overdue', 0) }}</strong>
+      </article>
+    </div>
+
+    {% if followup_alerts %}
+      <div class="alert-list" style="margin-top:1rem;">
+        {% for alert in followup_alerts[:6] %}
+          <div class="alert {{ 'alert-warning' if alert.type == 'warning' else 'alert-info' }}">
+            <strong>{{ alert.moment }}</strong> — {{ alert.message }}
+            <a href="{{ url_for('apprentices.detail', id=alert.apprentice.id) }}">
+              Ver aprendiz
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="muted">
+        No hay alertas de seguimiento próximas o vencidas.
+      </p>
+    {% endif %}
+
+  </section>
+
+{% else %}
+
+  <div class="alert alert-info">
+    No hay información disponible para mostrar en el dashboard.
+  </div>
+
+{% endif %}
+
+{% endblock %}

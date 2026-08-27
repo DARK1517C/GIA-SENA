@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Certificación — {{ apprentice.full_name }}{% endblock %}
+{% block content %}
+<section class="page-head"><div><h1>Certificación</h1><p>{{ apprentice.full_name }} — {{ apprentice.document_number }}</p></div></section>
+<section class="panel">
+  <h2>Requisitos documentales</h2>
+  <table class="table"><thead><tr><th>Actividad</th><th>Código</th><th>Estado</th><th></th></tr></thead><tbody>
+  {% for item in certification_requirements %}
+  <tr><td>{{ item.title or 'Requisito' }}</td><td>{{ item.code }}</td><td>{{ 'Aprobado' if item.ok else item.status|replace('_',' ')|title }}</td><td>{% if item.submission_id %}<a href="{{ url_for('evidences.detail', submission_id=item.submission_id) }}">Ver evidencia</a>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="4">No hay requisitos documentales configurados.</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+<section class="panel">
+  <h2>Seguimiento</h2>
+  <table class="table"><thead><tr><th>Momento</th><th>Rango</th><th>Estado</th><th></th></tr></thead><tbody>
+  {% for item in followup %}
+  <tr><td>{{ item.label }}</td><td>{% if item.start and item.end %}{{ item.start|date_dmY }} – {{ item.end|date_dmY }}{% else %}Sin configurar{% endif %}</td><td>{{ item.status_label }}</td><td>{% if item.submission_id %}<a href="{{ url_for('evidences.detail', submission_id=item.submission_id) }}">Ver evidencia</a>{% endif %}</td></tr>
+  {% endfor %}
+  </tbody></table>
+</section>
+<section class="panel">
+  <h2>Decisión</h2>
+  {% if is_certified %}
+    <p><strong>Certificado.</strong> Fecha de evaluación: {{ apprentice.evaluation_date|date_dmY if apprentice.evaluation_date else 'Sin fecha' }}</p>
+  {% elif ready %}
+    <form method="post" action="{{ url_for('certification.approve', apprentice_id=apprentice.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="approve-notes">Observaciones (opcional)</label>
+      <textarea id="approve-notes" name="notes" rows="4"></textarea>
+      <button class="btn btn-primary" type="submit">Aprobar certificación</button>
+    </form>
+    <hr>
+    <form method="post" action="{{ url_for('certification.reject', apprentice_id=apprentice.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label for="reject-notes">Motivo de no aprobación</label>
+      <textarea id="reject-notes" name="notes" rows="4" required></textarea>
+      <button class="btn btn-secondary" type="submit">Registrar no aprobación</button>
+    </form>
+  {% else %}
+    <p>El aprendiz aún no cumple todos los requisitos para una aprobación final.</p>
+  {% endif %}
+  {% if latest_review %}
+    <p>Última revisión: {{ latest_review.status }} — {{ latest_review.reviewed_at|date_dmY }}{% if latest_review.notes %}<br>{{ latest_review.notes }}{% endif %}</p>
+  {% endif %}
+</section>
+{% endblock %}

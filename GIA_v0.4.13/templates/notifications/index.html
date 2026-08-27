@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Notificaciones{% endblock %}
+{% block content %}
+<div class="page-head page-head--split">
+  <div>
+    <h1>Notificaciones</h1>
+    <p class="muted">Avisos y retroalimentación relacionados con tu proceso</p>
+  </div>
+  {% if notifications %}
+  <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="ghost-btn" type="submit">Marcar todas como leídas</button>
+  </form>
+  {% endif %}
+</div>
+<section class="panel notifications-page-list">
+  {% if notifications %}
+    {% for notification in notifications %}
+      <article class="notification-page-card{% if not notification.is_read %} notification-page-card--unread{% endif %}">
+        <div class="notification-page-card__indicator" aria-hidden="true"></div>
+        <div class="notification-page-card__content">
+          <div class="notification-page-card__head">
+            <strong>{{ notification.title }}</strong>
+            <small>{{ format_datetime_local(notification.created_at) }}</small>
+          </div>
+          <p>{{ notification.message }}</p>
+          <div class="notification-page-card__actions">
+            {% if notification.url %}
+              <a class="ghost-btn" href="{{ url_for('notifications.open_notification', notification_id=notification.id) }}">Ver</a>
+            {% endif %}
+            {% if not notification.is_read %}
+            <form method="post" action="{{ url_for('notifications.mark_read', notification_id=notification.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="ghost-btn" type="submit">Marcar como leída</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  {% else %}
+    <div class="notification-empty-state">
+      <div class="notification-empty-state__icon">✓</div>
+      <h2>No tienes notificaciones</h2>
+      <p class="muted">Aquí aparecerán avisos importantes sobre evidencias, seguimiento y certificación.</p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

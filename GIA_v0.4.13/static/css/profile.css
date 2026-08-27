@@ -1,0 +1,228 @@
+/* =========================================================
+   PERFIL DE USUARIO - Estilos organizados
+   =========================================================
+   Este archivo agrupa y documenta las reglas CSS para la
+   sección de perfil: grid, tarjeta de info, avatar, meta,
+   acciones, campos flotantes y comportamiento responsive.
+   ========================================================= */
+
+/* -------------------------
+   Contenedor principal
+   ------------------------- */
+/* Grid que contiene las tarjetas del perfil */
+.profile-grid {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+/* -------------------------
+   Tarjeta de información principal
+   ------------------------- */
+/* Tarjeta que muestra avatar, nombre/rol y acciones */
+.profile-info-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  gap: 16px;
+}
+
+/* Contenedor genérico de tarjeta (reutilizable) */
+.profile-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* -------------------------
+   Columna izquierda: avatar + texto
+   ------------------------- */
+/* Agrupa avatar y meta (nombre/rol) */
+.profile-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Avatar circular grande (imagen o fallback con iniciales) */
+.avatar-large {
+  width: 90px;
+  height: 90px;
+  min-width: 90px;
+  min-height: 90px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 28px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* Imagen dentro del avatar: cubrir y mantener proporción */
+.avatar-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* -------------------------
+   Meta: nombre y rol
+   ------------------------- */
+/* Contenedor vertical para nombre y rol */
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Nombre del usuario */
+.profile-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Rol o subtítulo del usuario */
+.profile-role {
+  margin: -4px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--colorneutral-5);
+}
+
+/* -------------------------
+   Acciones (lado derecho)
+   ------------------------- */
+/* Botones/acciones alineados a la derecha */
+.profile-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* -------------------------
+   Formularios y acciones dentro del perfil
+   ------------------------- */
+/* Contenedor para acciones del formulario (guardar, cancelar, etc.) */
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 0.8px;
+  align-items: center;
+}
+
+/* Fila que agrupa campos de contraseña (dos campos en línea) */
+.password-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 12px 0 0;
+}
+
+/* -------------------------
+   Campos flotantes (floating labels)
+   ------------------------- */
+/* Wrapper de cada campo con label flotante */
+.floating-field {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+/* Estilo base del input dentro del floating-field */
+.floating-field input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: var(--space-xs);
+  padding: 0 12px;
+  font-size: 14px;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+/* Label posicionado sobre el input (efecto flotante) */
+.floating-field label {
+  position: absolute;
+  left: var(--space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--line);
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+/* Estado activo: cuando el input tiene foco o contiene texto */
+/* El selector :not(:placeholder-shown) asume que el input usa placeholder="" cuando está vacío */
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label {
+  top: -2px;
+  left: var(--space-sm);
+  font-size: 12px;
+  color: var(--darkgreen);
+  background: var(--surface);
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+/* Borde activo del input en foco */
+.floating-field input:focus {
+  border-color: var(--darkgreen);
+  outline: none;
+}
+
+/* -------------------------
+   Accesibilidad y foco visible
+   ------------------------- */
+/* Asegura que el label no corte el borde redondeado al moverse */
+.floating-field input:focus + label,
+.floating-field input:not(:placeholder-shown) + label {
+  border-radius: 4px;
+}
+
+/* -------------------------
+   Responsive: comportamiento en pantallas pequeñas
+   ------------------------- */
+@media (max-width: 720px) {
+  /* Apilar la tarjeta de info en vertical */
+  .profile-info-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* Reducir separación en la columna izquierda */
+  .profile-left {
+    gap: 12px;
+  }
+
+  /* Alinear acciones al final (derecha) dentro del flujo apilado */
+  .profile-actions {
+    justify-content: flex-end;
+  }
+
+  /* Apilar la fila de contraseñas verticalmente */
+  .password-row {
+    flex-direction: column;
+  }
+}

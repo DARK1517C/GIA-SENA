@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Administración de evidencias | GIA{% endblock %}
+{% block content %}
+<div class="page-head page-head--split">
+  <div>
+    <h1>Administración de evidencias</h1>
+    <p class="muted">Configuración del dominio canónico: categorías, plantillas y actividades</p>
+  </div>
+  <div class="form-actions">
+    <a class="ghost-btn" href="{{ url_for('evidences.index') }}">← Evidencias</a>
+    {% if can_catalog %}<a class="primary-btn" href="{{ url_for('evidence_admin.category_create') }}">Nueva categoría</a>{% endif %}
+  </div>
+</div>
+
+{% if can_catalog %}
+<section class="info-card">
+  <div class="page-section-head"><h2>Categorías</h2></div>
+  <div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Orden</th><th>Nombre</th><th>Código</th><th>Color</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+  {% for category in categories %}
+  <tr><td>{{ category.sort_order }}</td><td>{{ category.name }}</td><td>{{ category.code }}</td><td><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:{{ category.color or '#39a900' }};vertical-align:middle"></span> {{ category.color or '—' }}</td><td>{{ 'Activa' if category.is_active else 'Inactiva' }}</td><td><a class="ghost-btn" href="{{ url_for('evidence_admin.category_edit', category_id=category.id) }}">Editar</a><form method="post" action="{{ url_for('evidence_admin.category_delete', category_id=category.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta categoría?');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="ghost-btn" type="submit">Eliminar</button></form></td></tr>
+  {% else %}<tr><td colspan="6" class="empty-state">No hay categorías.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+
+<section class="info-card">
+  <div class="page-section-head"><h2>Plantillas</h2><a class="primary-btn" href="{{ url_for('evidence_admin.template_create') }}">Nueva plantilla</a></div>
+  <div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Código</th><th>Título</th><th>Categoría</th><th>Estado</th><th>Proyecciones</th><th>Acciones</th></tr></thead><tbody>
+  {% for template in templates %}
+  <tr><td>{{ template.code }}</td><td>{{ template.title }}</td><td>{{ template.category.name }}</td><td>{{ 'Activa' if template.is_active else 'Inactiva' }}</td><td>{{ template.activities|length }}</td><td><a class="ghost-btn" href="{{ url_for('evidence_admin.template_edit', template_id=template.id) }}">Editar</a>{% if template.is_active %}<form method="post" action="{{ url_for('evidence_admin.template_sync', template_id=template.id) }}" style="display:inline">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="ghost-btn" type="submit">Sincronizar</button></form>{% endif %}<form method="post" action="{{ url_for('evidence_admin.template_delete', template_id=template.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta plantilla?');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="ghost-btn" type="submit">Eliminar</button></form></td></tr>
+  {% else %}<tr><td colspan="6" class="empty-state">No hay plantillas.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+
+{% if can_activities %}
+<section class="info-card">
+  <div class="page-section-head"><h2>Actividades</h2><a class="primary-btn" href="{{ url_for('evidence_admin.activity_create') }}">Nueva actividad</a></div>
+  <div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Ficha</th><th>Actividad</th><th>Categoría</th><th>Origen</th><th>Visibilidad</th><th>Acciones</th></tr></thead><tbody>
+  {% for activity in activities %}
+  <tr><td>{{ activity.group.group_number }}</td><td>{{ activity.title }}</td><td>{{ activity.category.name }}</td><td>{{ 'Plantilla institucional' if activity.is_from_template else 'Personalizada' }}</td><td>{{ 'Visible' if activity.is_visible else 'Oculta' }}</td><td><a class="ghost-btn" href="{{ url_for('evidence_admin.activity_edit', activity_id=activity.id) }}">Editar</a><form method="post" action="{{ url_for('evidence_admin.activity_delete', activity_id=activity.id) }}" style="display:inline" onsubmit="return confirm('¿Eliminar esta actividad?');">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="ghost-btn" type="submit">Eliminar</button></form></td></tr>
+  {% else %}<tr><td colspan="6" class="empty-state">No hay actividades en tus fichas visibles.</td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endif %}
+{% endblock %}
